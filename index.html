@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#1e150a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Earthside">
+<title>Earthside Nursery</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+html,body{height:100%;overflow:hidden;background:#1e150a}
+body{
+  font-family:'Barlow',sans-serif;
+  position:fixed;inset:0;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  display:flex;flex-direction:column;
+}
+#app{
+  max-width:430px;width:100%;margin:0 auto;
+  display:flex;flex-direction:column;
+  height:100%;overflow:hidden;
+  background:#f2ead4;
+}
+/* HEADER */
+#hdr{
+  flex-shrink:0;
+  background:#1e150a;
+  border-bottom:3px solid #8c7428;
+}
+.hdr-top{display:flex;align-items:center;gap:10px;padding:10px 14px 0}
+.hdr-logo{width:48px;height:48px;object-fit:contain;border-radius:8px;flex-shrink:0}
+.hdr-name{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;letter-spacing:-0.02em;color:#f2ead4;text-transform:uppercase;line-height:1}
+.hdr-sub{font-size:8px;color:#c8860a;letter-spacing:2px;text-transform:uppercase}
+.hdr-count{font-family:'Barlow Condensed',sans-serif;font-size:10px;color:#9b7a3a;text-transform:uppercase;letter-spacing:1px;text-align:right;line-height:1.4;margin-left:auto}
+/* TABS */
+#tabs{display:flex;gap:2px;padding:0 14px}
+.tab-btn{
+  flex:1;padding:8px 0 10px;
+  font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:#9b7a3a;background:none;border:none;cursor:pointer;
+  border-bottom:3px solid transparent;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+}
+.tab-btn.active{color:#c8860a;border-bottom-color:#c8860a}
+/* PAGES */
+#pages{flex:1;min-height:0;overflow:hidden;position:relative}
+.page{
+  position:absolute;inset:0;
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:14px;
+  display:none;
+}
+.page.active{display:block}
+/* INPUTS */
+input,select{
+  font-family:'Barlow',sans-serif;font-size:16px;
+  background:#e9ddb8;border:2px solid #b5993a;border-radius:8px;
+  color:#2c1f0e;padding:10px 12px;width:100%;outline:none;
+  -webkit-appearance:none;appearance:none;
+}
+input:focus,select:focus{border-color:#c8860a;box-shadow:0 0 0 3px #c8860a33}
+/* CARDS */
+.card{
+  background:#e9ddb8;border:2px solid #b5993a;border-radius:10px;
+  margin-bottom:10px;overflow:hidden;
+  box-shadow:2px 3px 0 #b5993a44;
+}
+.card-row{
+  display:flex;align-items:center;padding:12px 14px;gap:10px;
+  cursor:pointer;background:none;border:none;width:100%;text-align:left;
+}
+.card-icon{
+  width:42px;height:42px;border-radius:8px;flex-shrink:0;
+  background:#dfd1a0;border:2px solid #b5993a;
+  display:flex;align-items:center;justify-content:center;font-size:20px;
+}
+.card-icon.sm{width:38px;height:38px;font-size:18px}
+.plant-name{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;color:#2c1f0e;text-transform:uppercase;line-height:1.2}
+.plant-name.sm{font-size:16px}
+.card-meta{display:flex;gap:5px;margin-top:4px;flex-wrap:wrap;align-items:center}
+.badge{font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;white-space:nowrap;letter-spacing:.5px;text-transform:uppercase;font-family:'Barlow Condensed',sans-serif}
+.pill{font-size:10px;background:#dfd1a0;border-radius:4px;padding:1px 6px;color:#6b5020;border:1px solid #d4b86a;font-family:'Barlow Condensed',sans-serif;font-weight:600;text-transform:uppercase}
+.pill.gold{color:#c8860a;font-weight:700}
+.qty-num{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;min-width:32px;text-align:right;line-height:1}
+.chevron{font-size:12px;color:#9b7a3a;transition:.2s;flex-shrink:0}
+.chevron.open{transform:rotate(180deg)}
+/* DETAIL GRID */
+.detail{padding:12px 14px 14px;background:#dfd1a0;border-top:2px solid #b5993a;display:none}
+.detail.open{display:block}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px 10px;margin-bottom:10px}
+.detail-row{font-size:11px;line-height:1.5}
+.detail-label{color:#9b7a3a;font-weight:700;text-transform:uppercase;font-size:9px;letter-spacing:.5px}
+.detail-notes{font-size:11px;color:#6b5020;font-style:italic;line-height:1.6;border-top:1px solid #d4b86a;padding-top:8px}
+/* EMPTY STATE */
+.empty{text-align:center;padding:50px 20px}
+.empty-icon{font-size:48px;margin-bottom:12px}
+.empty-title{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;text-transform:uppercase;color:#2c1f0e;margin-bottom:6px}
+.empty-sub{font-size:13px;color:#6b5020}
+/* ADJUST DROPDOWN */
+#adj-drop{
+  position:relative;left:0;right:0;
+  background:#e9ddb8;border:2px solid #b5993a;border-radius:8px;
+  z-index:500;overflow:hidden;max-height:280px;overflow-y:auto;
+  box-shadow:0 8px 24px #00000044;display:none;
+  margin-top:-10px;margin-bottom:10px;
+}
+#adj-drop.open{display:block}
+.drop-item{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid #d4b86a;cursor:pointer;background:none;border-right:none;border-left:none;border-top:none;width:100%;text-align:left}
+.drop-item:last-child{border-bottom:none}
+.drop-item:active{background:#dfd1a0}
+.drop-name{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:#2c1f0e;text-transform:uppercase}
+.drop-latin{font-size:10px;color:#6b5020;font-style:italic}
+/* SELECTED PLANT CARD */
+.sel-hdr{padding:12px 14px;border-bottom:2px solid #b5993a;display:flex;align-items:center;gap:10px;background:#dfd1a0}
+.sel-name{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;color:#2c1f0e;text-transform:uppercase}
+.sel-latin{font-size:10px;color:#6b5020;font-style:italic;margin-top:2px}
+/* STOCK ENTRY ROWS */
+.entry-row{display:flex;align-items:center;padding:11px 14px;gap:8px;border-bottom:1px solid #d4b86a}
+.entry-row:last-child{border-bottom:none}
+.entry-qty{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:900}
+/* EDIT FORM */
+.edit-form{padding:14px;background:#dfd1a0}
+.field-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}
+.field-label{font-family:'Barlow Condensed',sans-serif;font-size:9px;font-weight:700;color:#6b5020;text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px}
+.new-qty-preview{font-size:11px;color:#6b5020;margin-bottom:10px;font-family:'Barlow Condensed',sans-serif}
+.btn-row{display:flex;gap:8px}
+.btn{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;padding:9px 0;border-radius:8px;border:2px solid #b5993a;background:#e9ddb8;color:#6b5020;width:100%}
+.btn.primary{background:#4a7c2f;border-color:#4a7c2f;color:#f2ead4}
+.btn.danger-sm{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;cursor:pointer;padding:5px 10px;color:#8c2020;background:none;border:1px solid #8c202044;border-radius:6px}
+.btn.sm{padding:5px 12px;font-size:11px;width:auto}
+/* ADD BUTTON */
+.add-btn{
+  width:100%;padding:12px;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;
+  letter-spacing:.05em;text-transform:uppercase;cursor:pointer;border-radius:10px;
+  border:2px dashed #b5993a;background:transparent;color:#6b5020;margin-top:2px;
+}
+/* NEW ENTRY FORM */
+.new-form-hdr{padding:8px 14px;background:#1e150a;border-bottom:2px solid #8c7428}
+.new-form-hdr-txt{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#f2ead4}
+.new-form-body{padding:14px}
+/* PILL BAR */
+.pill-bar{display:flex;gap:5px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px;margin-bottom:8px;scrollbar-width:none}
+.pill-bar::-webkit-scrollbar{display:none}
+.cat-pill{flex-shrink:0;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:5px 10px;border-radius:6px;cursor:pointer;border:1.5px solid #b5993a;background:transparent;color:#6b5020}
+.cat-pill.active{border:none}
+/* FOOTER COUNT */
+.lib-count{font-family:'Barlow Condensed',sans-serif;font-size:10px;color:#9b7a3a;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="hdr">
+    <div class="hdr-top">
+      <img class="hdr-logo" src="data:image/png;base64,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" alt="Earthside">
+      <div>
+        <div class="hdr-name">Earthside</div>
+        <div class="hdr-sub">Food Forests + Nursery</div>
+      </div>
+      <div class="hdr-count" id="plant-count-hdr"></div>
+    </div>
+    <div id="tabs">
+      <button class="tab-btn active" data-tab="stock" onclick="switchTab('stock',this)"><span>📦</span>Stock</button>
+      <button class="tab-btn" data-tab="adjust" onclick="switchTab('adjust',this)"><span>✏️</span>Adjust</button>
+      <button class="tab-btn" data-tab="library" onclick="switchTab('library',this)"><span>🌱</span>Library</button>
+    </div>
+  </div>
+
+  <div id="pages">
+    <!-- STOCK PAGE -->
+    <div class="page active" id="page-stock">
+      <input id="stock-search" type="search" placeholder="Search inventory…" oninput="renderStock()" autocomplete="off">
+      <div style="height:12px"></div>
+      <div id="stock-list"></div>
+    </div>
+
+    <!-- ADJUST PAGE -->
+    <div class="page" id="page-adjust">
+      <div style="position:relative;margin-bottom:14px">
+        <input id="adj-search" type="search" placeholder="Search all plants…" oninput="adjSearch()" autocomplete="off" onfocus="adjSearch()">
+      </div>
+      <div id="adj-drop"></div>
+      <div id="adj-content">
+        <div class="empty">
+          <div class="empty-icon">✏️</div>
+          <div class="empty-title">Search for a Plant</div>
+          <div class="empty-sub" id="adj-empty-sub"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LIBRARY PAGE -->
+    <div class="page" id="page-library">
+      <input id="lib-search" type="search" placeholder="Search plants…" oninput="renderLib()" autocomplete="off">
+      <div style="height:10px"></div>
+      <div class="pill-bar" id="pill-bar"></div>
+      <div class="lib-count" id="lib-count"></div>
+      <div id="lib-list"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const PLANTS = [
+  // ── CANOPY (Food Forest) ──
+  {id:1,name:"Black Walnut",cat:"Canopy",latin:"Juglans nigra",soil:"Deep, rich, well-drained",sun:"Full sun",water:"Moderate",zone:"4–9",height:"50–75 ft",bloom:"Spring",land:"Food forest canopy, windbreak",notes:"Native. Produces juglone — toxic to many plants. Excellent wildlife nut."},
+  {id:2,name:"Butternut",cat:"Canopy",latin:"Juglans cinerea",soil:"Rich, well-drained",sun:"Full sun",water:"Moderate",zone:"3–7",height:"40–60 ft",bloom:"Spring",land:"Food forest canopy, woodland",notes:"Native. Oily sweet nuts. Threatened by butternut canker."},
+  {id:3,name:"Chestnut",cat:"Canopy",latin:"Castanea spp.",soil:"Well-drained, acidic, sandy",sun:"Full sun",water:"Moderate",zone:"4–8",height:"40–70 ft",bloom:"Summer",land:"Food forest canopy, orchard",notes:"Edible chestnuts. Plant 2 for pollination."},
+  {id:4,name:"English Walnut",cat:"Canopy",latin:"Juglans regia",soil:"Deep, well-drained, fertile",sun:"Full sun",water:"Moderate",zone:"5–9",height:"40–60 ft",bloom:"Spring",land:"Food forest canopy, orchard",notes:"Commercial walnut. Self-fertile but better with 2 trees."},
+  {id:5,name:"Hackberry",cat:"Canopy",latin:"Celtis occidentalis",soil:"Adaptable, tolerates clay",sun:"Full sun to part shade",water:"Low",zone:"2–9",height:"40–60 ft",bloom:"Spring",land:"Food forest canopy, wildlife, shade",notes:"Native. Small edible berries loved by birds. Extremely adaptable."},
+  {id:6,name:"Hican",cat:"Canopy",latin:"Carya × laneyi",soil:"Deep, well-drained, fertile",sun:"Full sun",water:"Moderate",zone:"5–9",height:"50–80 ft",bloom:"Spring",land:"Food forest canopy",notes:"Native hybrid hickory × pecan. Large edible nuts."},
+  {id:7,name:"Hickory",cat:"Canopy",latin:"Carya spp.",soil:"Deep, well-drained, slightly acidic",sun:"Full sun",water:"Moderate",zone:"4–8",height:"50–80 ft",bloom:"Spring",land:"Food forest canopy, wildlife, native",notes:"Native. Shagbark and shellbark most edible. Important mast tree."},
+  {id:8,name:"Japanese Walnut",cat:"Canopy",latin:"Juglans ailantifolia",soil:"Deep, well-drained, fertile",sun:"Full sun",water:"Moderate",zone:"4–8",height:"30–60 ft",bloom:"Spring",land:"Food forest canopy",notes:"Heartnut cultivar popular. Produces juglone like black walnut but milder."},
+  {id:9,name:"Pecan",cat:"Canopy",latin:"Carya illinoinensis",soil:"Deep, well-drained, fertile",sun:"Full sun",water:"Moderate",zone:"5–9",height:"70–100 ft",bloom:"Spring",land:"Food forest canopy, orchard",notes:"Native. Largest hickory. Needs 2 for pollination. Very long-lived."},
+  {id:10,name:"American Persimmon",cat:"Canopy",latin:"Diospyros virginiana",soil:"Adaptable, well-drained",sun:"Full sun to part shade",water:"Low",zone:"4–9",height:"30–60 ft",bloom:"Spring",land:"Food forest canopy, wildlife, native",notes:"Native. Astringent until fully ripe. Wildlife magnet. Very cold hardy."},
+  // ── SMALL TREES (Food Forest) ──
+  {id:11,name:"Asian Pear",cat:"Small Tree",latin:"Pyrus pyrifolia",soil:"Well-drained, fertile",sun:"Full sun",water:"Moderate",zone:"5–9",height:"15–20 ft",bloom:"Spring",land:"Orchard, food forest",notes:"Crisp texture, apple-like. Needs cross-pollination."},
+  {id:12,name:"Hardy Fig",cat:"Small Tree",latin:"Ficus carica",soil:"Well-drained, average",sun:"Full sun",water:"Low–moderate",zone:"6–9",height:"10–15 ft",bloom:"N/A",land:"Food forest, container, courtyard",notes:"Self-fertile. Protect from frost in zones 6–7."},
+  {id:13,name:"Korean Stone Pine",cat:"Small Tree",latin:"Pinus koraiensis",soil:"Well-drained, slightly acidic",sun:"Full sun",water:"Moderate",zone:"3–7",height:"30–60 ft",bloom:"N/A (evergreen)",land:"Food forest canopy, shelter",notes:"Edible pine nuts. Very cold hardy. Slow growing but very long-lived."},
+  {id:14,name:"Chokecherry",cat:"Small Tree",latin:"Prunus virginiana",soil:"Average, well-drained, adaptable",sun:"Full sun to part shade",water:"Low–moderate",zone:"2–8",height:"10–25 ft",bloom:"Spring",land:"Food forest, native hedgerow, wildlife",notes:"Native. Tart edible cherries for jelly, syrup, wine. Suckers freely."},
+  {id:15,name:"Mulberry",cat:"Small Tree",latin:"Morus rubra",soil:"Average, adaptable",sun:"Full sun to part shade",water:"Low–moderate",zone:"5–9",height:"20–40 ft",bloom:"Spring",land:"Wildlife garden, food forest, shade",notes:"Native. Staining berries loved by birds. Sweet edible fruit."},
+  {id:16,name:"Pawpaw",cat:"Small Tree",latin:"Asimina triloba",soil:"Moist, rich, slightly acidic",sun:"Full sun to part shade",water:"Moderate",zone:"5–8",height:"15–30 ft",bloom:"Spring",land:"Food forest understory, woodland edge",notes:"Native. Largest edible native fruit. Tropical flavor. Needs 2 unrelated plants."},
+  {id:17,name:"Quince",cat:"Small Tree",latin:"Cydonia oblonga",soil:"Well-drained, fertile",sun:"Full sun",water:"Low–moderate",zone:"5–9",height:"10–15 ft",bloom:"Spring",land:"Orchard, ornamental garden",notes:"Beautiful spring flowers. Fragrant fruit for jelly. Self-fertile."},
+  {id:18,name:"Seaberry",cat:"Small Tree",latin:"Hippophae rhamnoides",soil:"Well-drained, poor to average",sun:"Full sun",water:"Very low",zone:"3–7",height:"8–12 ft",bloom:"Early spring",land:"Windbreak, wildlife, edible border",notes:"Sea buckthorn. Extremely cold hardy. Orange vitamin C-rich berries."},
+  {id:19,name:"Serviceberry",cat:"Small Tree",latin:"Amelanchier spp.",soil:"Moist, acidic, adaptable",sun:"Full sun to part shade",water:"Low–moderate",zone:"3–8",height:"6–20 ft",bloom:"Early spring",land:"Food forest, wildlife planting, specimen",notes:"Native. Early white flowers then edible berries. Excellent bird plant."},
+  {id:20,name:"Yellowhorn",cat:"Small Tree",latin:"Xanthoceras sorbifolium",soil:"Well-drained, fertile",sun:"Full sun",water:"Low–moderate",zone:"4–7",height:"10–15 ft",bloom:"Spring",land:"Specimen, food forest",notes:"Edible seeds like macadamia. White spring flowers. Rare."},
+  {id:21,name:"American Plum",cat:"Small Tree",latin:"Prunus americana",soil:"Dry to moist, adaptable",sun:"Full sun",water:"Low",zone:"3–8",height:"10–15 ft",bloom:"Spring",land:"Native hedgerow, edible border, wildlife",notes:"Native. Fragrant white flowers. Small tart edible plums. Thicket-forming."},
+  {id:22,name:"Beach Plum",cat:"Small Tree",latin:"Prunus maritima",soil:"Sandy, well-drained, poor",sun:"Full sun",water:"Low",zone:"3–6",height:"4–8 ft",bloom:"Spring",land:"Coastal hedgerow, edible border",notes:"Native. Tart small plums for jam and jelly."},
+  {id:23,name:"Bladdernut",cat:"Small Tree",latin:"Staphylea trifolia",soil:"Moist, well-drained, rich",sun:"Part shade to full sun",water:"Moderate",zone:"3–8",height:"10–15 ft",bloom:"Spring",land:"Woodland edge, native garden",notes:"Native. Unusual inflated seedpods. Edible seeds when young."},
+  {id:24,name:"Briana Apricot",cat:"Small Tree",latin:"Prunus armeniaca",soil:"Well-drained, fertile, slightly alkaline",sun:"Full sun",water:"Moderate",zone:"5–8",height:"15–20 ft",bloom:"Very early spring",land:"Orchard, food forest",notes:"Cold-hardy apricot. Blooms early; late frost is a risk. Self-fertile."},
+  {id:25,name:"Che",cat:"Small Tree",latin:"Cudrania tricuspidata",soil:"Well-drained, adaptable",sun:"Full sun",water:"Low",zone:"5–9",height:"15–25 ft",bloom:"Spring",land:"Food forest, hedgerow",notes:"Mulberry-like sweet edible fruit. Very adaptable. Thorny. Rare."},
+  {id:26,name:"Cherry Plum",cat:"Small Tree",latin:"Prunus cerasifera",soil:"Well-drained, fertile",sun:"Full sun",water:"Moderate",zone:"4–9",height:"15–25 ft",bloom:"Early spring",land:"Ornamental, food forest",notes:"First plum to bloom. Small sweet-tart fruit. Purple-leaf ornamental forms common."},
+  {id:27,name:"Chickasaw Plum",cat:"Small Tree",latin:"Prunus angustifolia",soil:"Dry, sandy, adaptable",sun:"Full sun",water:"Low",zone:"5–9",height:"10–15 ft",bloom:"Early spring",land:"Native hedgerow, wildlife, thicket",notes:"Native. Very early bloomer. Tart small plums. Thorny. Excellent wildlife plant."},
+  {id:28,name:"Cornelian Cherry",cat:"Small Tree",latin:"Cornus mas",soil:"Average, adaptable",sun:"Full sun to part shade",water:"Moderate",zone:"4–8",height:"15–25 ft",bloom:"Very early spring",land:"Food forest, ornamental, edible hedge",notes:"One of the first to bloom. Edible sour red cherries for jam and wine."},
+  {id:29,name:"Manchurian Apricot",cat:"Small Tree",latin:"Prunus mandshurica",soil:"Well-drained, average",sun:"Full sun",water:"Moderate",zone:"3–6",height:"15–25 ft",bloom:"Early spring",land:"Food forest, specimen",notes:"Very cold-hardy apricot. Small edible fruits. Excellent for northern growers."},
+  {id:30,name:"Oregon Crabapple",cat:"Small Tree",latin:"Malus fusca",soil:"Moist, well-drained",sun:"Full sun to part shade",water:"Moderate",zone:"4–8",height:"15–30 ft",bloom:"Spring",land:"Food forest, native garden, wildlife",notes:"Native. Small tart edible crabapples. Excellent for wildlife. Western native."},
+  {id:31,name:"Prairie Crabapple",cat:"Small Tree",latin:"Malus ioensis",soil:"Average, adaptable",sun:"Full sun to part shade",water:"Low–moderate",zone:"2–8",height:"15–25 ft",bloom:"Late spring",land:"Food forest, native planting, wildlife",notes:"Native. Fragrant pink blooms. Small tart crabapples."},
+  {id:32,name:"Sour Cherry",cat:"Small Tree",latin:"Prunus cerasus",soil:"Well-drained, fertile, slightly acidic",sun:"Full sun",water:"Moderate",zone:"4–8",height:"15–20 ft",bloom:"Spring",land:"Orchard, food forest",notes:"Self-fertile. Tart fruit for pies and preserves. More cold-hardy than sweet cherry."},
+  // ── FOOD FOREST SHRUBS ──
+  {id:33,name:"American Black Currant",cat:"Food Forest",latin:"Ribes americanum",soil:"Moist, well-drained, fertile",sun:"Part shade to full sun",water:"Moderate",zone:"2–6",height:"3–5 ft",bloom:"Spring",land:"Food forest shrub layer, native border",notes:"Native. Tart black currants. Very cold hardy. Tolerates shade."},
+  {id:34,name:"American Black Elderberry",cat:"Food Forest",latin:"Sambucus canadensis",soil:"Moist, rich, adaptable",sun:"Full sun to part shade",water:"Moderate",zone:"3–9",height:"5–12 ft",bloom:"Summer",land:"Native border, edible garden, wildlife",notes:"Native. White flower clusters produce edible dark berries for syrup and jelly."},
+  {id:35,name:"American Blue Elderberry",cat:"Food Forest",latin:"Sambucus nigra caerulea",soil:"Moist, rich, adaptable",sun:"Full sun",water:"Moderate",zone:"5–10",height:"6–15 ft",bloom:"Summer",land:"Food forest, wildlife, western US",notes:"Native to western North America. Blue-black elderberries."},
+  {id:36,name:"Aronia",cat:"Food Forest",latin:"Aronia melanocarpa",soil:"Adaptable – wet to dry",sun:"Full sun to part shade",water:"Low–moderate",zone:"3–9",height:"3–6 ft",bloom:"Spring",land:"Native garden, rain garden, hedge",notes:"Native black chokeberry. Antioxidant-rich tart berries. Stunning fall color."},
+  {id:37,name:"Black Raspberry",cat:"Food Forest",latin:"Rubus occidentalis",soil:"Well-drained, fertile",sun:"Full sun",water:"Moderate",zone:"4–8",height:"3–5 ft",bloom:"Spring",land:"Food forest, edible garden",notes:"Native. Smaller and sweeter than red raspberry. Arching canes root at tips."},
+  {id:38,name:"Bush Cherry",cat:"Food Forest",latin:"Prunus fruticosa",soil:"Well-drained, average",sun:"Full sun",water:"Low",zone:"2–7",height:"2–4 ft",bloom:"Spring",land:"Food forest, edible border",notes:"Mongolian dwarf cherry. Very cold hardy. Small tart cherries."},
+  {id:39,name:"Champagne Currant",cat:"Food Forest",latin:"Ribes aureum",soil:"Well-drained, adaptable",sun:"Full sun to part shade",water:"Low–moderate",zone:"3–8",height:"4–7 ft",bloom:"Spring",land:"Food forest, native border",notes:"Native golden currant. Fragrant yellow flowers. Black or golden berries."},
+  {id:40,name:"Cherry Prinsepia",cat:"Food Forest",latin:"Prinsepia sinensis",soil:"Well-drained, average",sun:"Full sun to part shade",water:"Low",zone:"3–7",height:"6–8 ft",bloom:"Early spring",land:"Food forest, hedgerow",notes:"Early bloomer. Sour red cherries used for jam. Thorny. Extremely cold hardy."},
+  {id:41,name:"Dwarf Chestnut",cat:"Food Forest",latin:"Castanea pumila",soil:"Well-drained, acidic, sandy",sun:"Full sun",water:"Low–moderate",zone:"5–9",height:"5–15 ft",bloom:"Summer",land:"Food forest, native shrub, wildlife",notes:"Native chinquapin. Sweet edible nuts. Spreads by suckers."},
+  {id:42,name:"Gooseberry",cat:"Food Forest",latin:"Ribes spp.",soil:"Well-drained, fertile",sun:"Full sun to part shade",water:"Moderate",zone:"3–6",height:"3–5 ft",bloom:"Spring",land:"Food forest, edible garden, hedgerow",notes:"Tart berries for jams and pies. Thorny stems. Very cold hardy."},
+  {id:43,name:"Goumi",cat:"Food Forest",latin:"Elaeagnus multiflora",soil:"Well-drained, poor to average",sun:"Full sun",water:"Low",zone:"4–9",height:"6–10 ft",bloom:"Spring",land:"Food forest, nitrogen-fixer, wildlife",notes:"Nitrogen-fixer. Sweet-tart red berries. Very adaptable."},
+  {id:44,name:"Groundcover Huckleberry",cat:"Food Forest",latin:"Gaylussacia procumbens",soil:"Acidic, sandy, well-drained",sun:"Part–full shade",water:"Low",zone:"3–6",height:"6–12 in",bloom:"Spring",land:"Woodland ground cover, food forest floor",notes:"Native. Wintergreen-flavored black berries. Creeping evergreen."},
+  {id:45,name:"Hazelnut",cat:"Food Forest",latin:"Corylus americana",soil:"Average to moist, adaptable",sun:"Full sun to part shade",water:"Low–moderate",zone:"4–9",height:"8–12 ft",bloom:"Early spring",land:"Food forest, native hedgerow, wildlife",notes:"Native. Edible hazelnuts. Plant 2 for pollination."},
+  {id:46,name:"Highbush Cranberry",cat:"Food Forest",latin:"Viburnum opulus var. americanum",soil:"Moist, adaptable",sun:"Full sun to part shade",water:"Moderate",zone:"2–7",height:"8–12 ft",bloom:"Spring",land:"Food forest, native garden, wildlife",notes:"Native viburnum. Tart cranberry-like berries persist through winter."},
+  {id:47,name:"Honeyberry",cat:"Food Forest",latin:"Lonicera caerulea",soil:"Well-drained, average to fertile",sun:"Full sun",water:"Moderate",zone:"2–8",height:"3–5 ft",bloom:"Very early spring",land:"Food forest, edible garden, ornamental border",notes:"Haskap. First fruit of spring. Tastes like blueberry-raspberry cross. Needs 2 plants."},
+  {id:48,name:"Huckleberry",cat:"Food Forest",latin:"Gaylussacia spp.",soil:"Acidic, sandy, moist",sun:"Part shade to full sun",water:"Moderate",zone:"3–7",height:"2–5 ft",bloom:"Spring",land:"Woodland garden, food forest floor",notes:"Native. Sweet edible berries. Related to blueberry."},
+  {id:49,name:"Jostaberry",cat:"Food Forest",latin:"Ribes × nidigrolaria",soil:"Well-drained, fertile",sun:"Full sun to part shade",water:"Moderate",zone:"3–8",height:"4–6 ft",bloom:"Spring",land:"Food forest, edible garden, hedgerow",notes:"Black currant × gooseberry cross. Disease resistant. Self-fertile."},
+  {id:50,name:"Nannyberry",cat:"Food Forest",latin:"Viburnum lentago",soil:"Adaptable – wet to dry",sun:"Full sun to full shade",water:"Low–moderate",zone:"2–8",height:"10–18 ft",bloom:"Spring",land:"Food forest, native garden, wildlife",notes:"Native. Sweet edible black berries. Tolerates deep shade."},
+  {id:51,name:"Northern Bayberry",cat:"Food Forest",latin:"Morella pensylvanica",soil:"Sandy, poor, acidic",sun:"Full sun to part shade",water:"Very low",zone:"2–7",height:"5–10 ft",bloom:"Spring",land:"Coastal planting, dunes, food forest",notes:"Native nitrogen-fixer. Waxy gray berries for candle-making. Salt and drought tolerant."},
+  {id:52,name:"Red Raspberry",cat:"Food Forest",latin:"Rubus idaeus var. strigosus",soil:"Well-drained, fertile",sun:"Full sun",water:"Moderate",zone:"3–9",height:"4–6 ft",bloom:"Spring",land:"Food forest, edible garden, hedgerow",notes:"Native wild raspberry. Prune floricanes after fruiting."},
+  {id:53,name:"River Locust",cat:"Food Forest",latin:"Amorpha fruticosa",soil:"Moist, adaptable – wet to dry",sun:"Full sun to part shade",water:"Low",zone:"4–9",height:"6–12 ft",bloom:"Late spring",land:"Food forest, native border, stream bank",notes:"Native nitrogen-fixer. Purple flower spikes. Tolerates flooding."},
+  {id:54,name:"Salmonberry",cat:"Food Forest",latin:"Rubus spectabilis",soil:"Moist, well-drained",sun:"Part shade to full sun",water:"Moderate",zone:"5–9",height:"4–8 ft",bloom:"Spring",land:"Food forest, woodland edge, western native",notes:"Native (Pacific Northwest). Salmon-colored edible berries."},
+  {id:55,name:"Sandcherry",cat:"Food Forest",latin:"Prunus pumila",soil:"Sandy, dry, well-drained",sun:"Full sun",water:"Low",zone:"2–6",height:"2–7 ft",bloom:"Spring",land:"Food forest, dunes, dry native border",notes:"Native. Dark purple edible cherries. Very cold and drought hardy."},
+  {id:56,name:"Silver Buffaloberry",cat:"Food Forest",latin:"Shepherdia argentea",soil:"Sandy, poor, alkaline",sun:"Full sun",water:"Very low",zone:"2–6",height:"6–15 ft",bloom:"Spring",land:"Food forest, windbreak, xeriscape",notes:"Native nitrogen-fixer. Tart silver berries. Thorny."},
+  {id:57,name:"Spicebush",cat:"Food Forest",latin:"Lindera benzoin",soil:"Moist, well-drained, slightly acidic",sun:"Part–full shade",water:"Moderate",zone:"4–9",height:"6–12 ft",bloom:"Very early spring",land:"Food forest, woodland garden, native",notes:"Native. Spicy aromatic all parts. Spicebush swallowtail host plant."},
+  {id:58,name:"Thornless Blackberry",cat:"Food Forest",latin:"Rubus fruticosus",soil:"Well-drained, fertile",sun:"Full sun",water:"Moderate",zone:"5–9",height:"3–6 ft",bloom:"Spring",land:"Food forest, edible garden",notes:"No thorns. Large sweet blackberries."},
+  {id:59,name:"White Currant",cat:"Food Forest",latin:"Ribes rubrum",soil:"Well-drained, fertile, slightly acidic",sun:"Full sun to part shade",water:"Moderate",zone:"3–5",height:"3–5 ft",bloom:"Spring",land:"Food forest, edible garden",notes:"White/clear berries. Mild sweet flavor. Excellent for fresh eating."},
+  {id:60,name:"Red Nanking Cherry",cat:"Food Forest",latin:"Prunus tomentosa",soil:"Well-drained, average",sun:"Full sun",water:"Low",zone:"2–7",height:"6–10 ft",bloom:"Very early spring",land:"Food forest, hedgerow, edible border",notes:"Very cold hardy. Small sweet-tart red cherries. One of first shrubs to bloom."},
+  {id:61,name:"Blueberry",cat:"Food Forest",latin:"Vaccinium corymbosum",soil:"Moist, acidic (pH 4.5–5.5), rich",sun:"Full sun",water:"Moderate",zone:"4–7",height:"3–6 ft",bloom:"Spring",land:"Food forest, edible garden, border",notes:"Plant 2+ varieties for best yield. Acidic soil essential."},
+  // ── HERBACEOUS (Food Forest) ──
+  {id:62,name:"Agrimony",cat:"Herbaceous",latin:"Agrimonia gryposepala",soil:"Average, well-drained",sun:"Full sun to part shade",water:"Low–moderate",zone:"4–8",height:"2–4 ft",bloom:"Summer",land:"Native meadow, woodland edge, herb garden",notes:"Native. Yellow flower spikes. Medicinal tea herb."},
+  {id:63,name:"American Skullcap",cat:"Herbaceous",latin:"Scutellaria lateriflora",soil:"Moist, rich, slightly acidic",sun:"Part shade to full sun",water:"Moderate",zone:"4–8",height:"12–24 in",bloom:"Summer",land:"Woodland garden, herb garden, native border",notes:"Native. Medicinal herb (nervine). Small blue flowers."},
+  {id:64,name:"Anise Hyssop",cat:"Herbaceous",latin:"Agastache foeniculum",soil:"Well-drained, average",sun:"Full sun to part shade",water:"Low–moderate",zone:"4–8",height:"2–3 ft",bloom:"Summer–fall",land:"Herb garden, pollinator garden, border",notes:"Native. Anise-scented. Lavender spikes. Outstanding bee plant."},
+  {id:65,name:"Arnica",cat:"Herbaceous",latin:"Arnica chamissonis",soil:"Well-drained, sandy, slightly acidic",sun:"Full sun to part shade",water:"Low–moderate",zone:"4–8",height:"12–18 in",bloom:"Summer",land:"Herb garden, meadow",notes:"Medicinal herb. Yellow daisy-like flowers. Used for muscle pain relief."},
+  {id:66,name:"Black Cohosh",cat:"Herbaceous",latin:"Actaea racemosa",soil:"Moist, rich, slightly acidic",sun:"Part–full shade",water:"Moderate",zone:"3–8",height:"4–6 ft",bloom:"Summer",land:"Woodland garden, shade border, medicinal",notes:"Native. Tall white racemes. Important medicinal plant."},
+  {id:67,name:"Black-Eyed Susan",cat:"Herbaceous",latin:"Rudbeckia hirta",soil:"Average to poor, well-drained",sun:"Full sun to part shade",water:"Low–moderate",zone:"3–9",height:"1–3 ft",bloom:"Summer–fall",land:"Prairie, meadow, border",notes:"Native wildflower. Attracts butterflies and goldfinches."},
+  {id:68,name:"Blue False Indigo",cat:"Herbaceous",latin:"Baptisia australis",soil:"Average, well-drained, adaptable",sun:"Full sun to part shade",water:"Low",zone:"3–9",height:"3–4 ft",bloom:"Late spring",land:"Prairie, border, food forest edge",notes:"Native. Deep roots. Inflated black seedpods in fall."},
+  {id:69,name:"Blue Sage",cat:"Herbaceous",latin:"Salvia azurea",soil:"Dry, well-drained, poor",sun:"Full sun",water:"Very low",zone:"4–9",height:"3–5 ft",bloom:"Late summer–fall",land:"Prairie, xeriscape, native border",notes:"Native. Sky-blue flower spikes. Drought tolerant."},
+  {id:70,name:"Blue Vervain",cat:"Herbaceous",latin:"Verbena hastata",soil:"Moist to wet, average",sun:"Full sun to part shade",water:"Moderate–high",zone:"3–9",height:"3–6 ft",bloom:"Summer",land:"Rain garden, wetland edge, native border",notes:"Native. Candelabra of purple flower spikes. Birds eat the seeds."},
+  {id:71,name:"Boneset",cat:"Herbaceous",latin:"Eupatorium perfoliatum",soil:"Moist to wet, average",sun:"Full sun to part shade",water:"Moderate–high",zone:"3–8",height:"2–4 ft",bloom:"Summer",land:"Rain garden, wetland, native border",notes:"Native. White fuzzy clusters. Traditional fever remedy. Excellent butterfly plant."},
+  {id:72,name:"Calendula",cat:"Herbaceous",latin:"Calendula officinalis",soil:"Well-drained, average to poor",sun:"Full sun",water:"Low–moderate",zone:"Annual",height:"12–24 in",bloom:"Spring–fall",land:"Herb garden, cutting garden, vegetable garden",notes:"Edible and medicinal flowers. Cool-season. Excellent companion plant."},
+  {id:73,name:"Canada Anemone",cat:"Herbaceous",latin:"Anemone canadensis",soil:"Moist to wet, average",sun:"Full sun to part shade",water:"Moderate–high",zone:"3–8",height:"12–24 in",bloom:"Late spring–early summer",land:"Rain garden, native border, bank",notes:"Native. White buttercup-like flowers. Spreads aggressively. Good for erosion control."},
+  {id:74,name:"Cardinal Flower",cat:"Herbaceous",latin:"Lobelia cardinalis",soil:"Moist to wet, rich",sun:"Full sun to part shade",water:"High",zone:"2–9",height:"2–4 ft",bloom:"Summer",land:"Wetland edge, rain garden, native",notes:"Native. Brilliant red spikes. Hummingbird magnet."},
+  {id:75,name:"Chives",cat:"Herbaceous",latin:"Allium schoenoprasum",soil:"Average, well-drained",sun:"Full sun to part shade",water:"Moderate",zone:"3–9",height:"12–18 in",bloom:"Spring–summer",land:"Herb garden, edible border, container",notes:"Edible flowers and leaves. Very easy. Self-seeds freely."},
+  {id:76,name:"Columbine",cat:"Herbaceous",latin:"Aquilegia canadensis",soil:"Average, well-drained",sun:"Part shade to full sun",water:"Low–moderate",zone:"3–8",height:"1–3 ft",bloom:"Spring",land:"Woodland garden, cottage border",notes:"Native. Red-yellow spurred flowers. Self-seeds freely. Hummingbird plant."},
+  {id:77,name:"Comfrey",cat:"Herbaceous",latin:"Symphytum officinale",soil:"Moist, rich, adaptable",sun:"Full sun to part shade",water:"Moderate",zone:"3–9",height:"2–4 ft",bloom:"Spring–summer",land:"Food forest, herb garden, dynamic accumulator",notes:"Deep taproot. Excellent mulch plant (chop and drop). Medicinal."},
+  {id:78,name:"Culver's Root",cat:"Herbaceous",latin:"Veronicastrum virginicum",soil:"Moist, average to rich",sun:"Full sun to part shade",water:"Moderate",zone:"3–8",height:"4–6 ft",bloom:"Summer",land:"Native border, prairie, meadow",notes:"Native. Tall white candelabra spikes. Monarch and swallowtail magnet."},
+  {id:79,name:"Cumberland Rosemary",cat:"Herbaceous",latin:"Conradina verticillata",soil:"Well-drained, rocky, poor",sun:"Full sun",water:"Low",zone:"5–8",height:"12–18 in",bloom:"Spring",land:"Rock garden, native garden",notes:"Native. Rosemary-scented leaves. Endangered in the wild."},
+  {id:80,name:"Daylily",cat:"Herbaceous",latin:"Hemerocallis fulva",soil:"Average to rich, adaptable",sun:"Full sun to part shade",water:"Low–moderate",zone:"3–10",height:"1–4 ft",bloom:"Summer",land:"Border, slope, naturalizing",notes:"Edible flower buds in Asian cuisine. Very hardy and low-maintenance."},
+  {id:81,name:"Echinacea",cat:"Herbaceous",latin:"Echinacea purpurea",soil:"Average, well-drained",sun:"Full sun to part shade",water:"Low–moderate",zone:"3–9",height:"2–4 ft",bloom:"Summer–fall",land:"Prairie, border, pollinator garden",notes:"Native. Medicinal and ornamental. Beloved by bees and butterflies."},
+  {id:82,name:"Fennel",cat:"Herbaceous",latin:"Foeniculum vulgare",soil:"Well-drained, average",sun:"Full sun",water:"Low–moderate",zone:"5–9 (perennial)",height:"3–5 ft",bloom:"Summer",land:"Herb garden, cutting garden",notes:"Anise flavor. Beautiful feathery foliage. Swallowtail host. Self-seeds."},
+  {id:83,name:"Feverfew",cat:"Herbaceous",latin:"Tanacetum parthenium",soil:"Well-drained, average",sun:"Full sun to part shade",water:"Low",zone:"4–9",height:"12–24 in",bloom:"Summer",land:"Herb garden, cottage garden",notes:"Medicinal (migraine herb). White daisy flowers. Self-seeds freely."},
+  {id:84,name:"Foxglove Beardtongue",cat:"Herbaceous",latin:"Penstemon digitalis",soil:"Average, well-drained",sun:"Full sun to part shade",water:"Low",zone:"3–8",height:"2–3 ft",bloom:"Early summer",land:"Border, native garden, prairie",notes:"Native. White tubular flowers. Deer resistant."},
+  {id:85,name:"Goldenseal",cat:"Herbaceous",latin:"Hydrastis canadensis",soil:"Moist, humus-rich, slightly acidic",sun:"Part–full shade",water:"Moderate",zone:"3–7",height:"8–12 in",bloom:"Spring",land:"Woodland garden, medicinal garden",notes:"Native. Valuable medicinal plant. Red berries. At-risk in wild."},
+  {id:86,name:"Great Blue Lobelia",cat:"Herbaceous",latin:"Lobelia siphilitica",soil:"Moist to wet",sun:"Part shade to full sun",water:"High",zone:"4–8",height:"2–3 ft",bloom:"Summer–fall",land:"Rain garden, wetland, native border",notes:"Native. Blue-purple flowers. Great companion to Cardinal Flower."},
+  {id:87,name:"Ground Plum",cat:"Herbaceous",latin:"Astragalus crassicarpus",soil:"Dry, sandy, well-drained",sun:"Full sun",water:"Very low",zone:"3–8",height:"6–12 in",bloom:"Spring",land:"Prairie, xeriscape, native garden",notes:"Native. Nitrogen-fixer. Edible young pods. Rare prairie plant."},
+  {id:88,name:"Heal-All",cat:"Herbaceous",latin:"Prunella vulgaris",soil:"Average, adaptable",sun:"Full sun to part shade",water:"Low–moderate",zone:"3–9",height:"6–12 in",bloom:"Summer",land:"Lawn, meadow, herb garden",notes:"Native. Medicinal herb. Purple flower whorls."},
+  {id:89,name:"Hoary Vervain",cat:"Herbaceous",latin:"Verbena stricta",soil:"Dry, well-drained, poor",sun:"Full sun",water:"Very low",zone:"4–8",height:"2–4 ft",bloom:"Summer",land:"Prairie, xeriscape, native meadow",notes:"Native. Purple flower spikes. Very drought tolerant."},
+  {id:90,name:"Honewort",cat:"Herbaceous",latin:"Cryptotaenia canadensis",soil:"Moist, humus-rich",sun:"Part–full shade",water:"Moderate",zone:"3–8",height:"12–24 in",bloom:"Summer",land:"Woodland garden, shade garden",notes:"Native. Edible leaves and roots. White flowers."},
+  {id:91,name:"Illinois Bundleflower",cat:"Herbaceous",latin:"Desmanthus illinoensis",soil:"Dry, well-drained, clay-tolerant",sun:"Full sun",water:"Low",zone:"4–9",height:"2–4 ft",bloom:"Summer",land:"Prairie, food forest, native meadow",notes:"Native nitrogen-fixer. Ferny foliage. High-protein seed."},
+  {id:92,name:"Korean Celery",cat:"Herbaceous",latin:"Angelica gigas",soil:"Moist, rich, well-drained",sun:"Part shade to full sun",water:"Moderate",zone:"4–8",height:"4–6 ft",bloom:"Late summer",land:"Shade border, woodland garden",notes:"Dramatic deep burgundy-purple flower umbels. Biennial or short-lived perennial."},
+  {id:93,name:"Lavender",cat:"Herbaceous",latin:"Lavandula angustifolia",soil:"Sandy, well-drained",sun:"Full sun",water:"Low",zone:"5–8",height:"1–3 ft",bloom:"Summer",land:"Herb garden, border, rock garden",notes:"Fragrant purple spikes. Deer resistant. Excellent for pollinators."},
+  {id:94,name:"Leeks",cat:"Herbaceous",latin:"Allium ampeloprasum",soil:"Fertile, well-drained",sun:"Full sun",water:"Moderate",zone:"Annual",height:"18–24 in",bloom:"N/A",land:"Vegetable garden, food forest",notes:"Blanch stem by hilling soil. Long growing season. Very cold tolerant."},
+  {id:95,name:"Lemon Balm",cat:"Herbaceous",latin:"Melissa officinalis",soil:"Average, well-drained",sun:"Full sun to part shade",water:"Low–moderate",zone:"4–9",height:"18–24 in",bloom:"Summer",land:"Herb garden, pollinator garden",notes:"Lemon-scented. Calming tea herb. Bee magnet. Self-seeds freely."},
+  {id:96,name:"Lovage",cat:"Herbaceous",latin:"Levisticum officinale",soil:"Rich, moist, well-drained",sun:"Full sun to part shade",water:"Moderate",zone:"3–8",height:"4–6 ft",bloom:"Summer",land:"Herb garden, food forest",notes:"Perennial celery-like herb. All parts used. Bold structural plant."},
+  {id:97,name:"Marshmallow",cat:"Herbaceous",latin:"Althaea officinalis",soil:"Moist, rich, well-drained",sun:"Full sun to part shade",water:"Moderate",zone:"3–9",height:"3–5 ft",bloom:"Summer",land:"Herb garden, medicinal garden",notes:"Medicinal root (mucilage). Pink hibiscus-like flowers. Edible leaves and flowers."},
+  {id:98,name:"Mint",cat:"Herbaceous",latin:"Mentha spp.",soil:"Moist, fertile, adaptable",sun:"Full sun to part shade",water:"Moderate",zone:"3–9",height:"12–24 in",bloom:"Summer",land:"Herb garden, container",notes:"Grow in container to contain spread. Many varieties."},
+  {id:99,name:"Wild Bergamot",cat:"Herbaceous",latin:"Monarda fistulosa",soil:"Dry to average, well-drained",sun:"Full sun to part shade",water:"Low",zone:"3–9",height:"2–4 ft",bloom:"Summer",land:"Prairie, meadow, native border",notes:"Native. Lavender-pink flowers. Drought tolerant once established."},
+  {id:100,name:"New England Aster",cat:"Herbaceous",latin:"Symphyotrichum novae-angliae",soil:"Average, moist, adaptable",sun:"Full sun",water:"Moderate",zone:"4–8",height:"3–6 ft",bloom:"Fall",land:"Border, prairie, native garden",notes:"Native. Brilliant purple-pink fall blooms. Monarch favorite."},
+  {id:101,name:"New Jersey Tea",cat:"Herbaceous",latin:"Ceanothus americanus",soil:"Dry, well-drained, poor",sun:"Full sun to part shade",water:"Very low",zone:"3–8",height:"3–4 ft",bloom:"Summer",land:"Native prairie, xeriscape, food forest",notes:"Native nitrogen-fixer. White flower clusters. Revolutionary War tea substitute."},
+  {id:102,name:"Nodding Onion",cat:"Herbaceous",latin:"Allium cernuum",soil:"Average, well-drained",sun:"Full sun to part shade",water:"Low",zone:"3–9",height:"12–24 in",bloom:"Summer",land:"Prairie, native garden, edible border",notes:"Native. All parts edible. Drooping pink-lavender flower clusters."},
+  {id:103,name:"Obedient Plant",cat:"Herbaceous",latin:"Physostegia virginiana",soil:"Moist, average",sun:"Full sun to part shade",water:"Moderate",zone:"3–9",height:"2–4 ft",bloom:"Summer–fall",land:"Native border, rain garden",notes:"Native. Pink-purple tubular flowers. Can be invasive."},
+  {id:104,name:"Oregano",cat:"Herbaceous",latin:"Origanum vulgare",soil:"Well-drained, average to poor",sun:"Full sun",water:"Low",zone:"5–9",height:"12–24 in",bloom:"Summer",land:"Herb garden, border, container",notes:"Fragrant culinary herb. Spreads by runners. Deer resistant."},
+  {id:105,name:"Pasque Flower",cat:"Herbaceous",latin:"Pulsatilla patens",soil:"Dry, sandy, well-drained",sun:"Full sun",water:"Very low",zone:"3–7",height:"6–10 in",bloom:"Very early spring",land:"Rock garden, prairie, xeriscape",notes:"Native. First prairie flower of spring. Silky seed heads."},
+  {id:106,name:"Purple Prairie Clover",cat:"Herbaceous",latin:"Dalea purpurea",soil:"Dry, well-drained, poor",sun:"Full sun",water:"Very low",zone:"3–8",height:"12–24 in",bloom:"Summer",land:"Prairie, meadow, xeriscape",notes:"Native nitrogen-fixer. Bright magenta flowers. Extremely drought tolerant."},
+  {id:107,name:"Rhubarb",cat:"Herbaceous",latin:"Rheum rhabarbarum",soil:"Rich, well-drained",sun:"Full sun to part shade",water:"Moderate",zone:"3–8",height:"2–4 ft",bloom:"Early summer",land:"Food forest, vegetable garden",notes:"Perennial. Only stalks edible; leaves are toxic."},
+  {id:108,name:"Rose Mallow Hibiscus",cat:"Herbaceous",latin:"Hibiscus moscheutos",soil:"Moist to wet, rich",sun:"Full sun",water:"High",zone:"4–9",height:"3–7 ft",bloom:"Summer",land:"Rain garden, wetland edge, native border",notes:"Native. Enormous dinner-plate flowers. Dies to ground in winter."},
+  {id:109,name:"Sage",cat:"Herbaceous",latin:"Salvia officinalis",soil:"Well-drained, average to poor",sun:"Full sun",water:"Low",zone:"4–8",height:"12–24 in",bloom:"Summer",land:"Herb garden, border, container",notes:"Culinary and ornamental. Drought tolerant."},
+  {id:110,name:"Sarsaparilla",cat:"Herbaceous",latin:"Aralia nudicaulis",soil:"Moist, acidic, humus-rich",sun:"Part–full shade",water:"Moderate",zone:"2–8",height:"12–18 in",bloom:"Spring",land:"Woodland garden, native shade garden",notes:"Native. Aromatic roots. White flower clusters. Spreads by rhizomes."},
+  {id:111,name:"Savory",cat:"Herbaceous",latin:"Satureja hortensis",soil:"Well-drained, average to poor",sun:"Full sun",water:"Low",zone:"Annual",height:"12–18 in",bloom:"Summer",land:"Herb garden, vegetable garden",notes:"Summer savory. Peppery culinary herb. Annual. Excellent with beans."},
+  {id:112,name:"Sneezeweed",cat:"Herbaceous",latin:"Helenium autumnale",soil:"Moist, average to rich",sun:"Full sun",water:"Moderate",zone:"3–8",height:"3–5 ft",bloom:"Late summer–fall",land:"Native border, rain garden, meadow",notes:"Native. Yellow and mahogany daisy flowers. Outstanding for butterflies."},
+  {id:113,name:"Solomon's Seal",cat:"Herbaceous",latin:"Polygonatum biflorum",soil:"Moist, humus-rich",sun:"Part–full shade",water:"Moderate",zone:"3–8",height:"2–3 ft",bloom:"Spring",land:"Woodland garden, shade border",notes:"Native. Arching stems with pendant white bells. Edible young shoots."},
+  {id:114,name:"Sorrel",cat:"Herbaceous",latin:"Rumex acetosa",soil:"Average to moist, slightly acidic",sun:"Full sun to part shade",water:"Moderate",zone:"3–7",height:"12–24 in",bloom:"Summer",land:"Herb garden, food forest, edible border",notes:"Sour lemony leaves. Harvest young for best flavor. Perennial."},
+  {id:115,name:"St. John's Wort",cat:"Herbaceous",latin:"Hypericum perforatum",soil:"Average, well-drained",sun:"Full sun",water:"Low",zone:"3–9",height:"2–3 ft",bloom:"Summer",land:"Herb garden, meadow, slope",notes:"Medicinal herb. Bright yellow flowers. Drought tolerant."},
+  {id:116,name:"Sweet Cicely",cat:"Herbaceous",latin:"Osmorhiza claytonii",soil:"Moist, humus-rich",sun:"Part–full shade",water:"Moderate",zone:"3–8",height:"18–30 in",bloom:"Spring",land:"Woodland garden, food forest floor",notes:"Native. Anise-scented. Edible sweet licorice-flavored roots and seeds."},
+  {id:117,name:"Tarragon",cat:"Herbaceous",latin:"Artemisia dracunculus",soil:"Well-drained, average to poor",sun:"Full sun",water:"Low",zone:"4–7",height:"18–24 in",bloom:"Summer",land:"Herb garden",notes:"French tarragon must be vegetatively propagated. Anise flavor."},
+  {id:118,name:"Thyme",cat:"Herbaceous",latin:"Thymus vulgaris",soil:"Well-drained, poor to average",sun:"Full sun",water:"Low",zone:"4–9",height:"6–12 in",bloom:"Summer",land:"Herb garden, rock garden, edging",notes:"Very hardy. Excellent between stepping stones. Culinary and ornamental."},
+  {id:119,name:"Walking Onion",cat:"Herbaceous",latin:"Allium × proliferum",soil:"Average, well-drained",sun:"Full sun to part shade",water:"Low–moderate",zone:"3–9",height:"18–24 in",bloom:"Summer",land:"Edible border, food forest",notes:"Produces bulbils at top that root when they fall ('walks'). All parts edible."},
+  {id:120,name:"White Prairie Clover",cat:"Herbaceous",latin:"Dalea candida",soil:"Dry, well-drained, poor",sun:"Full sun",water:"Very low",zone:"3–8",height:"12–24 in",bloom:"Summer",land:"Prairie, meadow, xeriscape",notes:"Native nitrogen-fixer. White flowers. Extremely drought tolerant."},
+  {id:121,name:"Wild Garlic",cat:"Herbaceous",latin:"Allium canadense",soil:"Average, well-drained",sun:"Full sun to part shade",water:"Low–moderate",zone:"4–8",height:"12–18 in",bloom:"Spring",land:"Edible border, food forest, native garden",notes:"Native. All parts edible. Spreads freely. Mild garlic flavor."},
+  {id:122,name:"Wild Geranium",cat:"Herbaceous",latin:"Geranium maculatum",soil:"Average, moist, well-drained",sun:"Part shade",water:"Moderate",zone:"3–8",height:"12–18 in",bloom:"Spring",land:"Woodland edge, native border",notes:"Native. Lavender-pink flowers. Easy care. Good groundcover."},
+  {id:123,name:"Wild Ginger",cat:"Herbaceous",latin:"Asarum canadense",soil:"Moist, rich, humus-rich",sun:"Part–full shade",water:"Moderate",zone:"3–7",height:"3–6 in",bloom:"Spring (hidden)",land:"Woodland ground cover, native garden",notes:"Native. Heart-shaped aromatic leaves. Spreads slowly."},
+  {id:124,name:"Wild Leeks",cat:"Herbaceous",latin:"Allium tricoccum",soil:"Moist, humus-rich",sun:"Part–full shade",water:"Moderate",zone:"3–8",height:"6–12 in",bloom:"Summer",land:"Woodland garden, food forest floor",notes:"Native ramp. Edible leaves in spring, bulbs in fall. Slow to establish."},
+  {id:125,name:"Yarrow",cat:"Herbaceous",latin:"Achillea millefolium",soil:"Poor to average, dry, well-drained",sun:"Full sun",water:"Very low",zone:"3–9",height:"2–3 ft",bloom:"Summer",land:"Meadow, border, cutting garden",notes:"Native. Flat-topped clusters. Very drought tolerant. Medicinal."},
+  {id:126,name:"Yellow Coneflower",cat:"Herbaceous",latin:"Ratibida pinnata",soil:"Dry to average, well-drained",sun:"Full sun",water:"Very low",zone:"3–8",height:"3–5 ft",bloom:"Summer",land:"Prairie, meadow, naturalized",notes:"Native. Drooping yellow petals. Very drought tolerant."},
+  {id:127,name:"Yucca",cat:"Herbaceous",latin:"Yucca filamentosa",soil:"Sandy, poor, well-drained",sun:"Full sun",water:"Very low",zone:"4–10",height:"2–3 ft (to 6 ft bloom)",bloom:"Summer",land:"Xeriscape, rock garden, native garden",notes:"Native. Sword-like leaves. Spectacular tall flower spikes. Edible flowers and fruit."},
+  // ── GROUNDCOVERS (Food Forest) ──
+  {id:128,name:"Bearberry",cat:"Groundcover",latin:"Arctostaphylos uva-ursi",soil:"Sandy, acidic, well-drained",sun:"Full sun to part shade",water:"Low",zone:"2–6",height:"6–12 in",bloom:"Spring",land:"Native ground cover, rock garden, slope",notes:"Native. Evergreen. Red berries for wildlife. Excellent for slopes."},
+  {id:129,name:"Cranberry",cat:"Groundcover",latin:"Vaccinium macrocarpon",soil:"Moist, acidic (pH 4.0–5.0), sandy",sun:"Full sun",water:"High",zone:"2–7",height:"6–8 in",bloom:"Spring",land:"Bog garden, food forest floor",notes:"Native. Needs very acidic wet soil. Red edible berries."},
+  {id:130,name:"Lingonberry",cat:"Groundcover",latin:"Vaccinium vitis-idaea",soil:"Moist, acidic, well-drained",sun:"Part shade to full sun",water:"Moderate",zone:"2–6",height:"6–12 in",bloom:"Spring",land:"Woodland ground cover, food forest floor",notes:"Tart red berries. Very cold hardy. Evergreen."},
+  {id:131,name:"Wild Strawberry",cat:"Groundcover",latin:"Fragaria virginiana",soil:"Well-drained, average",sun:"Full sun to part shade",water:"Moderate",zone:"3–8",height:"4–6 in",bloom:"Spring",land:"Ground cover, food forest floor, native",notes:"Native. Small intensely sweet berries. Spreads by runners."},
+  {id:132,name:"Wintergreen",cat:"Groundcover",latin:"Gaultheria procumbens",soil:"Moist, acidic, well-drained",sun:"Part–full shade",water:"Moderate",zone:"3–7",height:"3–6 in",bloom:"Summer",land:"Woodland ground cover, native garden",notes:"Native. Evergreen. Wintergreen-scented leaves and red edible berries in winter."},
+  // ── VINES (Food Forest) ──
+  {id:133,name:"Arctic Kiwi",cat:"Vine",latin:"Actinidia kolomikta",soil:"Well-drained, fertile",sun:"Full sun to part shade",water:"Moderate",zone:"3–8",height:"10–15 ft",bloom:"Spring",land:"Trellis, food forest, pergola",notes:"Very cold hardy. Grape-sized edible fruits. Pink and white variegated leaves."},
+  {id:134,name:"Virginia Clematis",cat:"Vine",latin:"Clematis virginiana",soil:"Moist, well-drained, average",sun:"Full sun to part shade",water:"Moderate",zone:"3–8",height:"15–20 ft",bloom:"Late summer",land:"Native trellis, woodland edge, fence",notes:"Native. Masses of tiny white flowers followed by feathery seed heads."},
+  {id:135,name:"Grape",cat:"Vine",latin:"Vitis spp.",soil:"Well-drained, poor to average",sun:"Full sun",water:"Low–moderate",zone:"4–9",height:"20–30 ft",bloom:"Spring",land:"Vineyard, trellis, arbor, food forest",notes:"Native species available. Edible fruit. Annual pruning is critical."},
+  {id:136,name:"Hardy Kiwi",cat:"Vine",latin:"Actinidia arguta",soil:"Well-drained, fertile",sun:"Full sun to part shade",water:"Moderate",zone:"4–8",height:"15–20 ft",bloom:"Spring",land:"Pergola, trellis, food forest",notes:"Grape-sized edible fruits. Vigorous vine. Needs male and female plant."},
+  {id:137,name:"Passion Fruit",cat:"Vine",latin:"Passiflora incarnata",soil:"Well-drained, average",sun:"Full sun to part shade",water:"Low–moderate",zone:"5–9",height:"15–25 ft",bloom:"Summer",land:"Trellis, native garden, food forest",notes:"Native maypop. Extraordinary exotic flowers. Edible fruit. Spreads by roots."},
+  {id:138,name:"Red Kiwi",cat:"Vine",latin:"Actinidia melanandra",soil:"Well-drained, fertile",sun:"Full sun to part shade",water:"Moderate",zone:"5–8",height:"15–20 ft",bloom:"Spring",land:"Trellis, food forest, pergola",notes:"Red-skinned kiwi fruit. Rare in cultivation."},
+  {id:139,name:"Schisandra",cat:"Vine",latin:"Schisandra chinensis",soil:"Moist, well-drained, slightly acidic",sun:"Part shade",water:"Moderate",zone:"4–8",height:"15–25 ft",bloom:"Spring",land:"Trellis, food forest, woodland edge",notes:"Five-flavor berry (wu wei zi). Medicinal and edible red berries. Needs male and female."},
+  // ── GRASSES / SEDGES ──
+  {id:140,name:"Big Bluestem",cat:"Grasses/Sedges",latin:"Andropogon gerardii",soil:"Dry to moist, adaptable",sun:"Full sun",water:"Low",zone:"3–9",height:"4–8 ft",bloom:"Late summer",land:"Prairie, meadow, native planting",notes:"Native. Dominant tallgrass prairie grass. Turkey-foot seed head."},
+  {id:141,name:"Blue Joint Grass",cat:"Grasses/Sedges",latin:"Calamagrostis canadensis",soil:"Moist to wet, adaptable",sun:"Full sun to part shade",water:"Moderate–high",zone:"2–8",height:"3–5 ft",bloom:"Summer",land:"Wetland edge, rain garden, native meadow",notes:"Native. Excellent for wet areas. Feathery blue-green seed heads."},
+  {id:142,name:"Bristly Sedge",cat:"Grasses/Sedges",latin:"Carex comosa",soil:"Wet to moist",sun:"Full sun to part shade",water:"High",zone:"4–8",height:"2–3 ft",bloom:"Spring–summer",land:"Pond edge, rain garden, wetland",notes:"Native. Dense tufts. Excellent for stabilizing wet banks."},
+  {id:143,name:"Brown Fox Sedge",cat:"Grasses/Sedges",latin:"Carex vulpinoidea",soil:"Wet to moist",sun:"Full sun to part shade",water:"High",zone:"3–8",height:"2–3 ft",bloom:"Spring–summer",land:"Pond edge, wetland, rain garden",notes:"Native. Fox-tail seed clusters. Excellent for wet naturalized areas."},
+  {id:144,name:"Little Bluestem",cat:"Grasses/Sedges",latin:"Schizachyrium scoparium",soil:"Dry to average, well-drained",sun:"Full sun",water:"Very low",zone:"3–9",height:"2–4 ft",bloom:"Summer",land:"Prairie, meadow, native border",notes:"Native. Brilliant orange-bronze fall color."},
+  {id:145,name:"Porcupine Sedge",cat:"Grasses/Sedges",latin:"Carex hystericina",soil:"Wet to moist",sun:"Full sun to part shade",water:"High",zone:"3–8",height:"18–30 in",bloom:"Spring–summer",land:"Pond edge, wetland, rain garden",notes:"Native. Bristly seed clusters. Excellent for pond margins."},
+  {id:146,name:"Silky Wild Rye",cat:"Grasses/Sedges",latin:"Elymus villosus",soil:"Moist, average to rich",sun:"Part shade to full sun",water:"Moderate",zone:"3–8",height:"2–3 ft",bloom:"Summer",land:"Woodland edge, native border",notes:"Native. One of few grasses for shade."},
+  {id:147,name:"Sweet Grass",cat:"Grasses/Sedges",latin:"Hierochloe odorata",soil:"Moist, average to rich",sun:"Full sun to part shade",water:"Moderate",zone:"3–8",height:"18–24 in",bloom:"Spring",land:"Native garden, wetland edge",notes:"Native. Vanilla-scented. Sacred to many Native American traditions."},
+  {id:148,name:"Switchgrass",cat:"Grasses/Sedges",latin:"Panicum virgatum",soil:"Adaptable – wet to dry",sun:"Full sun",water:"Low–moderate",zone:"5–9",height:"3–6 ft",bloom:"Summer",land:"Prairie, naturalized area, border",notes:"Native grass with airy seed heads and great fall color."},
+  {id:149,name:"Virginia Wild Rye",cat:"Grasses/Sedges",latin:"Elymus virginicus",soil:"Moist, average to rich",sun:"Part shade to full sun",water:"Moderate",zone:"3–8",height:"2–4 ft",bloom:"Summer",land:"Woodland edge, streamside, native border",notes:"Native. Short-awned nodding seed heads. Good for streamside stabilization."},
+  // ── SEMI-AQUATIC ──
+  {id:150,name:"Arrowhead",cat:"Semi-Aquatic",latin:"Sagittaria latifolia",soil:"Wet, mucky",sun:"Full sun",water:"Aquatic–high",zone:"4–10",height:"2–4 ft",bloom:"Summer",land:"Pond edge, wetland, bog garden",notes:"Native. Arrow-shaped leaves. Edible starchy tubers (wapato). Duck food."},
+  {id:151,name:"Blue Flag Iris",cat:"Semi-Aquatic",latin:"Iris versicolor",soil:"Moist to wet, slightly acidic",sun:"Full sun to part shade",water:"High",zone:"2–7",height:"2–3 ft",bloom:"Late spring",land:"Pond edge, rain garden, bog garden",notes:"Native. Blue-violet flowers. Excellent for pond margins. Toxic if ingested."},
+  {id:152,name:"Bog Tea",cat:"Semi-Aquatic",latin:"Rhododendron groenlandicum",soil:"Wet, acidic, peaty",sun:"Full sun to part shade",water:"Very high",zone:"1–6",height:"2–3 ft",bloom:"Spring",land:"Bog garden, wet acidic site",notes:"Native Labrador tea. Fragrant white flowers. Very cold hardy."},
+  {id:153,name:"Joe-Pye Weed",cat:"Semi-Aquatic",latin:"Eutrochium purpureum",soil:"Average to moist, adaptable",sun:"Full sun to part shade",water:"Moderate",zone:"4–9",height:"4–7 ft",bloom:"Late summer–fall",land:"Native border, prairie, wetland edge",notes:"Native. Mauve-pink clusters. Excellent butterfly plant."},
+  {id:154,name:"Swamp Mallow Hibiscus",cat:"Semi-Aquatic",latin:"Hibiscus moscheutos",soil:"Moist to wet, rich",sun:"Full sun",water:"High",zone:"4–9",height:"3–7 ft",bloom:"Summer",land:"Rain garden, wetland edge, bog garden",notes:"Native. Enormous flowers up to 12 inches across."},
+  {id:155,name:"Sweet Flag",cat:"Semi-Aquatic",latin:"Acorus americanus",soil:"Wet to moist",sun:"Full sun to part shade",water:"Aquatic–high",zone:"4–9",height:"18–36 in",bloom:"Spring–summer",land:"Pond edge, rain garden, bog garden",notes:"Native. Fragrant leaves when crushed. Used medicinally. Sword-like foliage."},
+  // ── PERENNIALS (ornamental) ──
+  {id:156,name:"Hosta",cat:"Perennial",latin:"Hosta spp.",soil:"Moist, rich, well-drained",sun:"Part–full shade",water:"Moderate",zone:"3–9",height:"6 in–4 ft",bloom:"Summer",land:"Shade garden, woodland border",notes:"Prized for bold foliage. Many cultivars."},
+  {id:157,name:"Bleeding Heart",cat:"Perennial",latin:"Lamprocapnos spectabilis",soil:"Moist, humus-rich",sun:"Part–full shade",water:"Moderate",zone:"3–9",height:"2–3 ft",bloom:"Spring",land:"Shade garden, woodland",notes:"Heart-shaped pink flowers. Goes dormant in summer."},
+  {id:158,name:"Astilbe",cat:"Perennial",latin:"Astilbe spp.",soil:"Moist, rich, slightly acidic",sun:"Part shade",water:"Moderate–high",zone:"4–8",height:"1–4 ft",bloom:"Summer",land:"Shade garden, bog edge",notes:"Feathery plumes. Needs consistent moisture."},
+  {id:159,name:"Russian Sage",cat:"Perennial",latin:"Perovskia atriplicifolia",soil:"Poor, dry, well-drained",sun:"Full sun",water:"Very low",zone:"5–9",height:"3–5 ft",bloom:"Summer–fall",land:"Border, xeriscape, rock garden",notes:"Silvery stems with lavender-blue spikes. Deer and drought resistant."},
+  {id:160,name:"Sedum Autumn Joy",cat:"Perennial",latin:"Hylotelephium 'Herbstfreude'",soil:"Well-drained, average to poor",sun:"Full sun",water:"Low",zone:"3–9",height:"18–24 in",bloom:"Late summer–fall",land:"Border, rock garden, container",notes:"Flat-topped pink-to-rust blooms. Excellent winter structure."},
+  {id:161,name:"Catmint",cat:"Perennial",latin:"Nepeta × faassenii",soil:"Well-drained, poor to average",sun:"Full sun",water:"Very low",zone:"4–8",height:"12–18 in",bloom:"Spring–fall",land:"Border, edging, rock garden",notes:"Long-blooming blue-violet. Cut back after first flush to rebloom."},
+  {id:162,name:"Coreopsis",cat:"Perennial",latin:"Coreopsis verticillata",soil:"Well-drained, poor to average",sun:"Full sun",water:"Very low",zone:"3–9",height:"1–2 ft",bloom:"Summer–fall",land:"Border, slope, naturalized area",notes:"Bright yellow daisy flowers. Very drought tolerant."},
+  {id:163,name:"Peonies",cat:"Perennial",latin:"Paeonia lactiflora",soil:"Rich, well-drained, neutral",sun:"Full sun to part shade",water:"Moderate",zone:"3–8",height:"2–3 ft",bloom:"Late spring–early summer",land:"Border, cutting garden, cottage",notes:"Fragrant, spectacular blooms. Plant eyes 1–2 in below soil."},
+  {id:164,name:"Shasta Daisy",cat:"Perennial",latin:"Leucanthemum × superbum",soil:"Average to fertile, well-drained",sun:"Full sun to part shade",water:"Moderate",zone:"4–9",height:"2–3 ft",bloom:"Summer",land:"Cottage garden, border, cutting",notes:"Classic white daisy. Deadhead for extended bloom."},
+  {id:165,name:"Bee Balm",cat:"Perennial",latin:"Monarda didyma",soil:"Rich, moist, well-drained",sun:"Full sun to part shade",water:"Moderate",zone:"4–9",height:"2–4 ft",bloom:"Summer",land:"Cottage garden, border, pollinator",notes:"Native. Attracts hummingbirds and bees."},
+  {id:166,name:"Delphinium",cat:"Perennial",latin:"Delphinium elatum",soil:"Rich, moist, well-drained, alkaline",sun:"Full sun",water:"Moderate–high",zone:"3–7",height:"4–7 ft",bloom:"Early summer",land:"Cottage garden, border, cutting",notes:"Dramatic tall spikes. Stake in windy areas."},
+  {id:167,name:"Coral Bells",cat:"Perennial",latin:"Heuchera spp.",soil:"Moist, well-drained, rich",sun:"Part–full shade",water:"Moderate",zone:"4–9",height:"8–18 in",bloom:"Late spring–summer",land:"Shade garden, border, container",notes:"Colorful foliage in purple, bronze, green."},
+  {id:168,name:"Lupine",cat:"Perennial",latin:"Lupinus × hybridus",soil:"Poor to average, slightly acidic",sun:"Full sun to light shade",water:"Moderate",zone:"4–8",height:"3–4 ft",bloom:"Late spring–early summer",land:"Cottage garden, border, meadow",notes:"Bold colorful spires. Does not transplant well."},
+  {id:169,name:"Foxglove",cat:"Perennial",latin:"Digitalis purpurea",soil:"Moist, rich, slightly acidic",sun:"Part shade to full sun",water:"Moderate",zone:"4–9",height:"3–6 ft",bloom:"Early summer",land:"Cottage garden, woodland edge",notes:"Towering tubular flowers. Toxic if ingested. Self-seeds freely."},
+  {id:170,name:"Hellebore",cat:"Perennial",latin:"Helleborus orientalis",soil:"Moist, well-drained, rich",sun:"Part–full shade",water:"Moderate",zone:"4–9",height:"18–24 in",bloom:"Late winter–spring",land:"Shade garden, woodland border",notes:"Winter bloomer. Evergreen. Toxic if ingested. Very long-lived."},
+  {id:171,name:"Swamp Milkweed",cat:"Perennial",latin:"Asclepias incarnata",soil:"Moist to wet, rich",sun:"Full sun",water:"Moderate–high",zone:"3–6",height:"3–4 ft",bloom:"Summer",land:"Rain garden, bog edge, native",notes:"Native. Monarch butterfly host plant. Fragrant pink flowers."},
+  {id:172,name:"Butterfly Weed",cat:"Perennial",latin:"Asclepias tuberosa",soil:"Dry, sandy, well-drained",sun:"Full sun",water:"Very low",zone:"3–9",height:"1–2 ft",bloom:"Summer",land:"Prairie, border, xeriscape",notes:"Native monarch host. Brilliant orange flowers."},
+  {id:173,name:"Goldenrod",cat:"Perennial",latin:"Solidago canadensis",soil:"Poor to average, well-drained",sun:"Full sun",water:"Low",zone:"3–8",height:"2–4 ft",bloom:"Late summer–fall",land:"Prairie, meadow, native border",notes:"Native. Excellent late-season pollinator."},
+  {id:174,name:"Virginia Bluebells",cat:"Perennial",latin:"Mertensia virginica",soil:"Moist, humus-rich",sun:"Part–full shade",water:"Moderate",zone:"3–8",height:"12–24 in",bloom:"Early spring",land:"Woodland garden, native shade border",notes:"Native. Sky-blue trumpet flowers. Goes dormant by summer."},
+  {id:175,name:"Creeping Phlox",cat:"Perennial",latin:"Phlox subulata",soil:"Well-drained, average to poor",sun:"Full sun",water:"Low",zone:"3–9",height:"4–6 in",bloom:"Spring",land:"Rock garden, slope, ground cover",notes:"Moss-like mat covered in flowers. Excellent for slopes."},
+  {id:176,name:"Liatris",cat:"Perennial",latin:"Liatris spicata",soil:"Well-drained, average",sun:"Full sun",water:"Low–moderate",zone:"3–8",height:"2–4 ft",bloom:"Summer",land:"Prairie, border, cut flower",notes:"Blazing star. Native. Rosy-purple spikes bloom top to bottom."},
+  {id:177,name:"Geranium Rozanne",cat:"Perennial",latin:"Geranium 'Rozanne'",soil:"Average, well-drained",sun:"Full sun to part shade",water:"Moderate",zone:"5–8",height:"12–18 in",bloom:"Late spring–fall",land:"Border, rock garden, ground cover",notes:"Award-winning hardy geranium. Violet-blue blooms all season."},
+  {id:178,name:"Karl Foerster Grass",cat:"Grass",latin:"Calamagrostis × acutiflora",soil:"Average to moist, adaptable",sun:"Full sun to part shade",water:"Moderate",zone:"5–9",height:"4–6 ft",bloom:"Summer",land:"Border, accent, screening",notes:"Upright feathery plumes. Perennial of the Year 2001."},
+  {id:179,name:"Ostrich Fern",cat:"Fern",latin:"Matteuccia struthiopteris",soil:"Moist to wet, rich",sun:"Part–full shade",water:"High",zone:"3–7",height:"3–5 ft",bloom:"N/A",land:"Shade garden, woodland, bog edge",notes:"Elegant vase-shaped fern. Spreads by runners."},
+  {id:180,name:"Japanese Painted Fern",cat:"Fern",latin:"Athyrium niponicum 'Pictum'",soil:"Moist, rich, slightly acidic",sun:"Part–full shade",water:"Moderate",zone:"3–8",height:"12–18 in",bloom:"N/A",land:"Shade garden, woodland border",notes:"Silver and maroon variegated fronds. Perennial of the Year 2004."},
+  {id:181,name:"Christmas Fern",cat:"Fern",latin:"Polystichum acrostichoides",soil:"Average, well-drained",sun:"Part–full shade",water:"Moderate",zone:"3–9",height:"1–2 ft",bloom:"N/A",land:"Shade garden, woodland, slope",notes:"Native evergreen fern. Good for erosion control."},
+  // ── SHRUBS ──
+  {id:182,name:"Knockout Rose",cat:"Shrub",latin:"Rosa 'Radrazz'",soil:"Well-drained, fertile",sun:"Full sun",water:"Moderate",zone:"5–9",height:"3–4 ft",bloom:"Spring–frost",land:"Border, mass planting, container",notes:"Disease-resistant, repeat bloomer. Minimal deadheading needed."},
+  {id:183,name:"Panicle Hydrangea",cat:"Shrub",latin:"Hydrangea paniculata",soil:"Moist, well-drained, adaptable",sun:"Full sun to part shade",water:"Moderate",zone:"3–8",height:"6–15 ft",bloom:"Summer–fall",land:"Border, specimen, hedge",notes:"Large cone-shaped blooms. Very cold hardy."},
+  {id:184,name:"Smooth Hydrangea",cat:"Shrub",latin:"Hydrangea arborescens",soil:"Average to moist, adaptable",sun:"Part shade to full sun",water:"Moderate",zone:"3–9",height:"3–5 ft",bloom:"Summer",land:"Native border, shade garden",notes:"Native. 'Annabelle' cultivar. Large white mophead blooms."},
+  {id:185,name:"Forsythia",cat:"Shrub",latin:"Forsythia × intermedia",soil:"Average, well-drained, adaptable",sun:"Full sun to part shade",water:"Low–moderate",zone:"5–9",height:"5–10 ft",bloom:"Early spring",land:"Border, hedge, slope",notes:"First bright yellow blooms of spring. Prune right after flowering."},
+  {id:186,name:"Lilac",cat:"Shrub",latin:"Syringa vulgaris",soil:"Moist, well-drained, slightly alkaline",sun:"Full sun",water:"Low–moderate",zone:"3–7",height:"8–15 ft",bloom:"Late spring",land:"Border, foundation, specimen, hedge",notes:"Intensely fragrant clusters. Needs cold winters for best blooms."},
+  {id:187,name:"Weigela",cat:"Shrub",latin:"Weigela florida",soil:"Well-drained, fertile, adaptable",sun:"Full sun to part shade",water:"Moderate",zone:"4–8",height:"4–6 ft",bloom:"Late spring–early summer",land:"Border, mixed shrub bed, foundation",notes:"Trumpet flowers in red, pink, white. Attracts hummingbirds."},
+  {id:188,name:"Ninebark",cat:"Shrub",latin:"Physocarpus opulifolius",soil:"Adaptable, tolerates clay",sun:"Full sun to part shade",water:"Low–moderate",zone:"2–7",height:"5–10 ft",bloom:"Late spring",land:"Native border, naturalized area, hedge",notes:"Native with exfoliating bark and colorful foliage cultivars."},
+  {id:189,name:"Winterberry Holly",cat:"Shrub",latin:"Ilex verticillata",soil:"Wet to moist, acidic",sun:"Full sun to part shade",water:"High",zone:"3–9",height:"6–10 ft",bloom:"Spring",land:"Wetland edge, native garden, wildlife",notes:"Native. Brilliant red berries through winter. Needs male pollinator."},
+  {id:190,name:"Beautyberry",cat:"Shrub",latin:"Callicarpa americana",soil:"Average, adaptable",sun:"Full sun to part shade",water:"Low–moderate",zone:"6–10",height:"4–6 ft",bloom:"Summer",land:"Naturalized area, border, wildlife",notes:"Stunning bright purple berries in fall."},
+  {id:191,name:"Buttonbush",cat:"Shrub",latin:"Cephalanthus occidentalis",soil:"Wet to moist",sun:"Full sun to part shade",water:"High",zone:"5–11",height:"6–12 ft",bloom:"Summer",land:"Pond edge, rain garden, wetland",notes:"Native. Unique spherical white flowers."},
+  {id:192,name:"Rhododendron",cat:"Shrub",latin:"Rhododendron spp.",soil:"Moist, acidic, well-drained",sun:"Part shade",water:"Moderate",zone:"4–8",height:"3–10 ft",bloom:"Spring",land:"Woodland edge, foundation, border",notes:"Large trusses of flowers. Acid soil essential."},
+  {id:193,name:"Azalea",cat:"Shrub",latin:"Rhododendron spp. (azalea)",soil:"Moist, acidic, well-drained",sun:"Part shade",water:"Moderate",zone:"4–9",height:"2–6 ft",bloom:"Spring",land:"Foundation, border, woodland edge",notes:"Abundant spring blooms."},
+  {id:194,name:"Mountain Laurel",cat:"Shrub",latin:"Kalmia latifolia",soil:"Moist, acidic, well-drained",sun:"Part shade to full sun",water:"Moderate",zone:"4–9",height:"5–15 ft",bloom:"Late spring",land:"Woodland garden, native border",notes:"Native evergreen. Cup-shaped flowers in pink, white, red."},
+  {id:195,name:"Sweetshrub",cat:"Shrub",latin:"Calycanthus floridus",soil:"Moist, average to rich, adaptable",sun:"Full sun to part shade",water:"Moderate",zone:"4–9",height:"6–9 ft",bloom:"Late spring–summer",land:"Native garden, woodland border",notes:"Native. Burgundy flowers with spicy fragrance."},
+  // ── TREES ──
+  {id:196,name:"Japanese Maple",cat:"Tree",latin:"Acer palmatum",soil:"Moist, well-drained, slightly acidic",sun:"Part shade to full sun",water:"Moderate",zone:"5–8",height:"6–25 ft",bloom:"Spring (foliage)",land:"Specimen, woodland edge, container",notes:"Stunning fall color. Many leaf forms and sizes."},
+  {id:197,name:"Eastern Redbud",cat:"Tree",latin:"Cercis canadensis",soil:"Average to moist, well-drained",sun:"Full sun to part shade",water:"Moderate",zone:"4–9",height:"20–30 ft",bloom:"Early spring",land:"Specimen, woodland edge, border",notes:"Native. Rosy-pink flowers on bare branches. Heart-shaped leaves."},
+  {id:198,name:"Flowering Dogwood",cat:"Tree",latin:"Cornus florida",soil:"Moist, well-drained, slightly acidic",sun:"Part shade to full sun",water:"Moderate",zone:"5–9",height:"15–30 ft",bloom:"Spring",land:"Woodland edge, specimen, understory",notes:"Native. White or pink bracts. Red berries for wildlife."},
+  {id:199,name:"River Birch",cat:"Tree",latin:"Betula nigra",soil:"Moist, slightly acidic",sun:"Full sun to part shade",water:"Moderate–high",zone:"4–9",height:"30–40 ft",bloom:"Spring (catkins)",land:"Rain garden, streamside, specimen",notes:"Native. Exfoliating salmon-pink bark. Yellow fall color."},
+  {id:200,name:"Red Maple",cat:"Tree",latin:"Acer rubrum",soil:"Adaptable – moist to average",sun:"Full sun to part shade",water:"Moderate",zone:"3–9",height:"40–60 ft",bloom:"Early spring",land:"Shade tree, specimen, street tree",notes:"Native. Brilliant scarlet fall color."},
+  {id:201,name:"White Oak",cat:"Tree",latin:"Quercus alba",soil:"Average, well-drained, slightly acidic",sun:"Full sun",water:"Low–moderate",zone:"3–9",height:"50–80 ft",bloom:"Spring (catkins)",land:"Shade tree, wildlife habitat, specimen",notes:"Native. Massive long-lived tree. Supports hundreds of caterpillar species."},
+  {id:202,name:"Eastern White Pine",cat:"Tree",latin:"Pinus strobus",soil:"Moist, well-drained, slightly acidic",sun:"Full sun to part shade",water:"Moderate",zone:"3–8",height:"50–80 ft",bloom:"N/A",land:"Screen, windbreak, naturalizing",notes:"Native. Fast-growing soft evergreen. Graceful long needles."},
+  {id:203,name:"Arborvitae",cat:"Tree",latin:"Thuja occidentalis",soil:"Moist, well-drained, slightly acidic",sun:"Full sun to part shade",water:"Moderate",zone:"2–7",height:"10–40 ft",bloom:"N/A (evergreen)",land:"Privacy screen, hedge, foundation",notes:"Dense evergreen for privacy. Many sizes available."},
+  {id:204,name:"Sugar Maple",cat:"Tree",latin:"Acer saccharum",soil:"Moist, well-drained, slightly acidic",sun:"Full sun to part shade",water:"Moderate",zone:"3–8",height:"60–75 ft",bloom:"Spring",land:"Shade tree, specimen, woodland",notes:"Native. Spectacular orange-red fall color. Source of maple syrup."},
+  {id:205,name:"Saucer Magnolia",cat:"Tree",latin:"Magnolia × soulangeana",soil:"Moist, well-drained, slightly acidic",sun:"Full sun to part shade",water:"Moderate",zone:"4–9",height:"20–25 ft",bloom:"Early spring",land:"Specimen, lawn, border focal",notes:"Large cup-shaped pink flowers before leaves emerge."},
+  // ── ANNUALS ──
+  {id:206,name:"Marigold",cat:"Annual",latin:"Tagetes patula",soil:"Well-drained, average",sun:"Full sun",water:"Low–moderate",zone:"Annual",height:"6–18 in",bloom:"Summer–frost",land:"Vegetable garden, annual border, container",notes:"Pest repellent near vegetables. Strong scent deters deer."},
+  {id:207,name:"Zinnia",cat:"Annual",latin:"Zinnia elegans",soil:"Well-drained, average",sun:"Full sun",water:"Moderate",zone:"Annual",height:"12–36 in",bloom:"Summer–frost",land:"Cutting garden, annual border, pollinator",notes:"Easy from seed. Attracts butterflies."},
+  {id:208,name:"Sunflower",cat:"Annual",latin:"Helianthus annuus",soil:"Average, well-drained",sun:"Full sun",water:"Low–moderate",zone:"Annual",height:"2–10 ft",bloom:"Summer–fall",land:"Cutting garden, meadow, vegetable garden",notes:"Easy from seed. Seeds attract birds. Many sizes."},
+  {id:209,name:"Cosmos",cat:"Annual",latin:"Cosmos bipinnatus",soil:"Poor to average, well-drained",sun:"Full sun",water:"Low",zone:"Annual",height:"2–4 ft",bloom:"Summer–frost",land:"Cutting garden, meadow, cottage border",notes:"Feathery foliage. Self-seeds freely."},
+  {id:210,name:"Petunia",cat:"Annual",latin:"Petunia × hybrida",soil:"Moist, well-drained, fertile",sun:"Full sun",water:"Moderate",zone:"Annual",height:"6–18 in",bloom:"Spring–frost",land:"Container, hanging basket, border edging",notes:"Trailing and upright forms. Deadhead for best blooms."},
+  {id:211,name:"Impatiens",cat:"Annual",latin:"Impatiens walleriana",soil:"Moist, well-drained, fertile",sun:"Part–full shade",water:"Moderate–high",zone:"Annual",height:"6–24 in",bloom:"Spring–frost",land:"Shade bed, container, hanging basket",notes:"Classic shade annual. Keep moist."},
+  {id:212,name:"Coleus",cat:"Annual",latin:"Solenostemon scutellarioides",soil:"Moist, fertile, well-drained",sun:"Part–full shade",water:"Moderate",zone:"Annual",height:"12–36 in",bloom:"N/A (foliage)",land:"Shade bed, container, tropical accent",notes:"Spectacular foliage in hundreds of patterns and colors."},
+  {id:213,name:"Snapdragon",cat:"Annual",latin:"Antirrhinum majus",soil:"Well-drained, fertile",sun:"Full sun",water:"Moderate",zone:"Annual – cool season",height:"6 in–3 ft",bloom:"Spring and fall",land:"Border, cutting garden, container",notes:"Cool-season annual. Dragon-mouth flowers."},
+  {id:214,name:"Pansy",cat:"Annual",latin:"Viola × wittrockiana",soil:"Moist, fertile, well-drained",sun:"Full sun to part shade",water:"Moderate",zone:"Annual – cold tolerant",height:"6–9 in",bloom:"Spring and fall",land:"Seasonal bed, container, border edging",notes:"Cool-season annual. Edible flowers."},
+  {id:215,name:"Lantana",cat:"Annual",latin:"Lantana camara",soil:"Well-drained, average to poor",sun:"Full sun",water:"Low",zone:"Annual; perennial zones 10–11",height:"2–6 ft",bloom:"Spring–frost",land:"Container, tropical accent, border",notes:"Superb butterfly plant. Heat and drought tolerant."},
+  // ── BULBS ──
+  {id:216,name:"Tulip",cat:"Bulb",latin:"Tulipa gesneriana",soil:"Well-drained, fertile, alkaline",sun:"Full sun",water:"Low (summer dry)",zone:"3–8",height:"6–24 in",bloom:"Spring",land:"Spring border, container, cutting garden",notes:"Plant bulbs in fall. Best treated as annual in warm climates."},
+  {id:217,name:"Daffodil",cat:"Bulb",latin:"Narcissus pseudonarcissus",soil:"Well-drained, average to fertile",sun:"Full sun to part shade",water:"Low (summer dry)",zone:"3–9",height:"6–18 in",bloom:"Early spring",land:"Spring border, naturalized lawn, woodland edge",notes:"Deer proof. Naturalize well."},
+  {id:218,name:"Dahlia",cat:"Bulb",latin:"Dahlia pinnata",soil:"Fertile, well-drained",sun:"Full sun",water:"Moderate",zone:"Annual; zones 8–11 perennial",height:"1–5 ft",bloom:"Summer–frost",land:"Cutting garden, annual border",notes:"Hundreds of forms. Tubers may be overwintered indoors."},
+  {id:219,name:"Gladiolus",cat:"Bulb",latin:"Gladiolus × hybridus",soil:"Well-drained, fertile",sun:"Full sun",water:"Moderate",zone:"Annual; zones 7–10 perennial",height:"2–5 ft",bloom:"Summer",land:"Cutting garden, mixed border",notes:"Tall spikes. Plant corms in succession for extended bloom."},
+  {id:220,name:"Canna Lily",cat:"Bulb",latin:"Canna × generalis",soil:"Rich, moist",sun:"Full sun",water:"Moderate–high",zone:"Zones 7–11; dig in cold",height:"3–8 ft",bloom:"Summer–frost",land:"Tropical accent, border, container",notes:"Bold tropical foliage. Lift and store rhizomes in fall."},
+  {id:221,name:"Crocus",cat:"Bulb",latin:"Crocus vernus",soil:"Well-drained, average",sun:"Full sun to part shade",water:"Low",zone:"3–8",height:"3–5 in",bloom:"Very early spring",land:"Lawn, rock garden, spring border",notes:"One of the first blooms of spring. Naturalize in lawns."},
+  // ── HOUSEPLANTS ──
+  {id:222,name:"Pothos",cat:"Houseplant",latin:"Epipremnum aureum",soil:"Well-drained potting mix",sun:"Low to bright indirect",water:"Low–moderate",zone:"Indoor/tropical",height:"Trailing",bloom:"Rarely indoors",land:"Indoor, hanging basket",notes:"Nearly indestructible. Tolerates low light. Toxic to pets."},
+  {id:223,name:"Snake Plant",cat:"Houseplant",latin:"Sansevieria trifasciata",soil:"Well-drained, sandy potting mix",sun:"Low to bright indirect",water:"Very low",zone:"Indoor/tropical",height:"1–4 ft",bloom:"Rarely",land:"Indoor container",notes:"Air purifying. Tolerates neglect. Toxic to pets."},
+  {id:224,name:"Monstera",cat:"Houseplant",latin:"Monstera deliciosa",soil:"Rich, moist, well-drained potting mix",sun:"Bright indirect",water:"Moderate",zone:"Indoor/tropical",height:"6–10 ft (indoors)",bloom:"Rarely indoors",land:"Indoor tropical accent",notes:"Iconic split leaves. Allow soil to partially dry."},
+  {id:225,name:"Peace Lily",cat:"Houseplant",latin:"Spathiphyllum wallisii",soil:"Moist, rich, well-drained potting mix",sun:"Low to medium indirect",water:"Moderate",zone:"Indoor/tropical",height:"1–3 ft",bloom:"Spring–summer",land:"Indoor container",notes:"White spathe flowers. Air-cleaning plant. Toxic to pets."},
+  {id:226,name:"ZZ Plant",cat:"Houseplant",latin:"Zamioculcas zamiifolia",soil:"Well-drained, sandy potting mix",sun:"Low to bright indirect",water:"Very low",zone:"Indoor/tropical",height:"2–4 ft",bloom:"Rarely",land:"Indoor container",notes:"Extremely drought tolerant. Glossy leaves."},
+  {id:227,name:"Fiddle-Leaf Fig",cat:"Houseplant",latin:"Ficus lyrata",soil:"Well-drained, rich potting mix",sun:"Bright indirect",water:"Moderate – consistent",zone:"Indoor/tropical",height:"5–10 ft (indoors)",bloom:"Rarely indoors",land:"Indoor statement plant",notes:"Dramatic large leaves. Dislikes drafts and root disturbance."},
+  {id:228,name:"Bird of Paradise",cat:"Houseplant",latin:"Strelitzia reginae",soil:"Rich, moist, well-drained",sun:"Full sun to bright indirect",water:"Moderate",zone:"Zones 10–12; indoor",height:"3–5 ft",bloom:"Winter–spring",land:"Indoor/tropical accent",notes:"Spectacular orange and blue flowers."},
+  {id:229,name:"Spider Plant",cat:"Houseplant",latin:"Chlorophytum comosum",soil:"Well-drained potting mix",sun:"Bright indirect",water:"Moderate",zone:"Indoor/tropical",height:"12–24 in",bloom:"Occasionally",land:"Indoor, hanging basket",notes:"Easy. Produces cascading offsets. Air purifying. Pet-safe."},
+  {id:230,name:"Aloe Vera",cat:"Houseplant",latin:"Aloe barbadensis",soil:"Sandy, well-drained, poor",sun:"Full sun to part shade",water:"Very low",zone:"8–11",height:"1–2 ft",bloom:"Summer",land:"Indoor, container, xeriscape",notes:"Succulent with medicinal sap. Needs excellent drainage."},
+  // ── VEGETABLES ──
+  {id:231,name:"Tomato",cat:"Vegetable",latin:"Solanum lycopersicum",soil:"Rich, well-drained, slightly acidic",sun:"Full sun",water:"Moderate–high",zone:"Annual",height:"2–6 ft",bloom:"Summer",land:"Vegetable garden, container, raised bed",notes:"Warm-season crop. Stake or cage. Many varieties: cherry to beefsteak."},
+  {id:232,name:"Sweet Pepper",cat:"Vegetable",latin:"Capsicum annuum",soil:"Well-drained, fertile",sun:"Full sun",water:"Moderate",zone:"Annual",height:"18–24 in",bloom:"Summer",land:"Vegetable garden, container, raised bed",notes:"Harvest green or let ripen to red, yellow, orange."},
+  {id:233,name:"Cucumber",cat:"Vegetable",latin:"Cucumis sativus",soil:"Rich, well-drained",sun:"Full sun",water:"Moderate–high",zone:"Annual",height:"Trailing/climbing",bloom:"Summer",land:"Vegetable garden, trellis",notes:"Warm season. Harvest frequently to encourage production."},
+  {id:234,name:"Zucchini",cat:"Vegetable",latin:"Cucurbita pepo",soil:"Rich, well-drained",sun:"Full sun",water:"Moderate–high",zone:"Annual",height:"2–4 ft",bloom:"Summer",land:"Vegetable garden, raised bed",notes:"Very prolific. Harvest young for best flavor."},
+  {id:235,name:"Pumpkin",cat:"Vegetable",latin:"Cucurbita pepo",soil:"Rich, well-drained",sun:"Full sun",water:"Moderate–high",zone:"Annual",height:"Trailing vine",bloom:"Summer",land:"Vegetable garden, field",notes:"Needs lots of space. Harvest when deep orange."},
+  {id:236,name:"Bush Beans",cat:"Vegetable",latin:"Phaseolus vulgaris",soil:"Average, well-drained",sun:"Full sun",water:"Moderate",zone:"Annual",height:"12–24 in",bloom:"Summer",land:"Vegetable garden, raised bed",notes:"Easy and productive. Pick frequently."},
+  {id:237,name:"Sugar Snap Peas",cat:"Vegetable",latin:"Pisum sativum var. saccharatum",soil:"Well-drained, average to fertile",sun:"Full sun",water:"Moderate",zone:"Annual – cool season",height:"3–5 ft",bloom:"Spring",land:"Vegetable garden, trellis",notes:"Cool-season. Plant as soon as soil can be worked."},
+  {id:238,name:"Lettuce",cat:"Vegetable",latin:"Lactuca sativa",soil:"Moist, fertile, well-drained",sun:"Part shade to full sun",water:"Moderate",zone:"Annual – cool season",height:"6–12 in",bloom:"N/A",land:"Vegetable garden, container, raised bed",notes:"Cool season. Succession plant every 2 weeks."},
+  {id:239,name:"Kale",cat:"Vegetable",latin:"Brassica oleracea var. sabellica",soil:"Fertile, moist, well-drained",sun:"Full sun",water:"Moderate",zone:"Annual/biennial",height:"1–3 ft",bloom:"N/A",land:"Vegetable garden, edible border",notes:"Flavor improves after frost. Very nutritious."},
+  {id:240,name:"Carrot",cat:"Vegetable",latin:"Daucus carota var. sativus",soil:"Loose, sandy, deep, well-drained",sun:"Full sun",water:"Moderate",zone:"Annual – cool season",height:"12–18 in",bloom:"N/A",land:"Vegetable garden, raised bed",notes:"Sow direct. Thin to 2 in. Loosen soil for straight roots."},
+  {id:241,name:"Garlic",cat:"Vegetable",latin:"Allium sativum",soil:"Well-drained, fertile",sun:"Full sun",water:"Moderate",zone:"Annual",height:"18–24 in",bloom:"Summer (scapes)",land:"Vegetable garden, herb garden",notes:"Plant cloves in fall. Harvest when lower leaves are brown."},
+  {id:242,name:"Broccoli",cat:"Vegetable",latin:"Brassica oleracea var. italica",soil:"Fertile, moist, slightly alkaline",sun:"Full sun",water:"Moderate",zone:"Annual – cool season",height:"18–30 in",bloom:"N/A",land:"Vegetable garden, raised bed",notes:"Cool season. Harvest head before flowers open."},
+  {id:243,name:"Potato",cat:"Vegetable",latin:"Solanum tuberosum",soil:"Loose, well-drained, slightly acidic",sun:"Full sun",water:"Moderate",zone:"Annual",height:"18–30 in",bloom:"Summer",land:"Vegetable garden, raised bed",notes:"Plant certified seed potatoes. Hill soil as plants grow."},
+  {id:244,name:"Eggplant",cat:"Vegetable",latin:"Solanum melongena",soil:"Rich, well-drained",sun:"Full sun",water:"Moderate",zone:"Annual",height:"2–4 ft",bloom:"Summer",land:"Vegetable garden, container",notes:"Heat-loving. Start indoors 8–10 weeks before last frost."},
+  {id:245,name:"Onion",cat:"Vegetable",latin:"Allium cepa",soil:"Fertile, well-drained",sun:"Full sun",water:"Moderate",zone:"Annual",height:"18–24 in",bloom:"Summer (second year)",land:"Vegetable garden, raised bed",notes:"Grow from sets, transplants, or seed. Cure before storing."},
+  {id:246,name:"Asparagus",cat:"Vegetable",latin:"Asparagus officinalis",soil:"Well-drained, fertile",sun:"Full sun",water:"Moderate",zone:"2–8",height:"3–5 ft fern",bloom:"N/A",land:"Permanent vegetable bed",notes:"Perennial. Takes 2–3 years to establish. Productive for 20+ years."},
+  {id:247,name:"Rhubarb",cat:"Vegetable",latin:"Rheum × hybridum",soil:"Rich, well-drained",sun:"Full sun to part shade",water:"Moderate",zone:"3–8",height:"2–4 ft",bloom:"Early summer",land:"Permanent vegetable bed, border",notes:"Perennial. Only stalks edible; leaves are toxic."},
+  // ── HERBS ──
+  {id:248,name:"Basil",cat:"Herb",latin:"Ocimum basilicum",soil:"Well-drained, fertile",sun:"Full sun",water:"Moderate",zone:"Annual",height:"12–24 in",bloom:"Summer",land:"Herb garden, vegetable garden, container",notes:"Warm season. Pinch flowers to maintain flavor. Many varieties."},
+  {id:249,name:"Rosemary",cat:"Herb",latin:"Salvia rosmarinus",soil:"Well-drained, poor to average",sun:"Full sun",water:"Very low",zone:"7–10",height:"2–4 ft",bloom:"Spring–summer",land:"Herb garden, border, container",notes:"Drought tolerant. Bring indoors in zones below 7."},
+  {id:250,name:"Parsley",cat:"Herb",latin:"Petroselinum crispum",soil:"Fertile, moist, well-drained",sun:"Full sun to part shade",water:"Moderate",zone:"Biennial – zones 5–9",height:"12–18 in",bloom:"Year 2",land:"Herb garden, container, edible border",notes:"Curly or flat-leaf (Italian). Swallowtail butterfly caterpillar host."},
+  {id:251,name:"Cilantro",cat:"Herb",latin:"Coriandrum sativum",soil:"Well-drained, fertile",sun:"Full sun to part shade",water:"Moderate",zone:"Annual – cool season",height:"12–24 in",bloom:"Summer",land:"Herb garden, vegetable garden",notes:"Cool season. Bolts quickly in heat. Seeds = coriander."},
+  {id:252,name:"Dill",cat:"Herb",latin:"Anethum graveolens",soil:"Well-drained, average",sun:"Full sun",water:"Low–moderate",zone:"Annual",height:"2–3 ft",bloom:"Summer",land:"Herb garden, vegetable garden",notes:"Self-seeds. Swallowtail host. Leaves and seeds both culinary."},
+  {id:253,name:"Mint",cat:"Herb",latin:"Mentha spicata",soil:"Moist, fertile, adaptable",sun:"Full sun to part shade",water:"Moderate",zone:"3–9",height:"12–24 in",bloom:"Summer",land:"Herb garden, container",notes:"Grow in container to contain spread. Many varieties."},
+  {id:254,name:"German Chamomile",cat:"Herb",latin:"Matricaria chamomilla",soil:"Poor, well-drained",sun:"Full sun",water:"Low",zone:"Annual",height:"12–24 in",bloom:"Summer",land:"Herb garden, cutting garden, meadow",notes:"Apple-scented tea herb. Self-seeds freely."},
+  {id:255,name:"Borage",cat:"Herb",latin:"Borago officinalis",soil:"Poor, well-drained",sun:"Full sun",water:"Low",zone:"Annual",height:"18–24 in",bloom:"Summer",land:"Herb garden, cottage garden, vegetable garden",notes:"Edible blue flowers. Cucumber flavor. Excellent bee plant."},
+  {id:256,name:"Holy Basil (Tulsi)",cat:"Herb",latin:"Ocimum tenuiflorum",soil:"Well-drained, fertile",sun:"Full sun",water:"Moderate",zone:"Annual",height:"18–24 in",bloom:"Summer",land:"Herb garden, container",notes:"Sacred Indian herb. Clove-like spicy flavor. Excellent tea herb."},
+  {id:257,name:"Lemon Balm",cat:"Herb",latin:"Melissa officinalis",soil:"Average, well-drained",sun:"Full sun to part shade",water:"Low–moderate",zone:"4–9",height:"18–24 in",bloom:"Summer",land:"Herb garden, pollinator garden",notes:"Lemon-scented. Calming tea herb. Bee magnet. Self-seeds freely."},
+  {id:258,name:"Catnip",cat:"Herb",latin:"Nepeta cataria",soil:"Well-drained, average",sun:"Full sun to part shade",water:"Low",zone:"3–9",height:"2–3 ft",bloom:"Summer",land:"Herb garden, pollinator garden",notes:"Cats adore it. Calming tea for humans. Excellent bee plant."},
+  {id:259,name:"Ginger",cat:"Herb",latin:"Zingiber officinale",soil:"Rich, moist, well-drained",sun:"Part shade",water:"Moderate–high",zone:"8–12; container",height:"2–4 ft",bloom:"Summer",land:"Container, tropical garden, greenhouse",notes:"Harvest roots in fall. Beautiful tropical foliage."},
+  {id:260,name:"Stevia",cat:"Herb",latin:"Stevia rebaudiana",soil:"Well-drained, light, slightly acidic",sun:"Full sun",water:"Moderate",zone:"Annual (perennial zones 9–11)",height:"18–24 in",bloom:"Late summer–fall",land:"Herb garden, container",notes:"Natural zero-calorie sweetener. Leaves 250× sweeter than sugar."},
+  {id:261,name:"Bay Laurel",cat:"Herb",latin:"Laurus nobilis",soil:"Well-drained, average to fertile",sun:"Full sun to part shade",water:"Low–moderate",zone:"7–10; container",height:"Container: 3–6 ft",bloom:"Spring",land:"Herb garden, container, formal garden",notes:"Culinary bay leaf. Slow growing. Bring indoors in cold climates."},
+  // ── SUCCULENTS / CACTI ──
+  {id:262,name:"Hens and Chicks",cat:"Succulent",latin:"Sempervivum tectorum",soil:"Poor, sandy, well-drained",sun:"Full sun",water:"Very low",zone:"3–8",height:"3–6 in",bloom:"Summer",land:"Rock garden, container, wall garden",notes:"Rosette-forming. Offsets freely. Hardy succulent."},
+  {id:263,name:"Sedum Autumn Joy",cat:"Succulent",latin:"Hylotelephium 'Herbstfreude'",soil:"Well-drained, average to poor",sun:"Full sun",water:"Low",zone:"3–9",height:"18–24 in",bloom:"Late summer–fall",land:"Border, rock garden, container",notes:"Flat-topped pink-to-rust blooms. Excellent winter structure."},
+  {id:264,name:"Aloe Vera (garden)",cat:"Succulent",latin:"Aloe barbadensis",soil:"Sandy, well-drained, poor",sun:"Full sun",water:"Very low",zone:"8–11",height:"1–2 ft",bloom:"Summer",land:"Container, xeriscape, rock garden",notes:"Medicinal sap. Drought tolerant. Excellent drainage essential."},
+  {id:265,name:"Prickly Pear",cat:"Cactus",latin:"Opuntia humifusa",soil:"Sandy, well-drained, poor",sun:"Full sun",water:"Very low",zone:"4–9",height:"12–18 in",bloom:"Summer",land:"Rock garden, xeriscape, native",notes:"Native. Yellow flowers, edible red fruit. Cold hardy."},
+  {id:266,name:"Christmas Cactus",cat:"Cactus",latin:"Schlumbergera bridgesii",soil:"Well-drained potting mix",sun:"Bright indirect",water:"Low–moderate",zone:"Indoor/tropical",height:"12–18 in",bloom:"Winter",land:"Indoor container",notes:"Epiphytic forest cactus. Blooms triggered by cool nights."},
+];
+
+const CAT_COLORS = {
+  "Perennial":{bg:"#4a7c2f",lt:"#d4edb8"},"Shrub":{bg:"#7c5a2f",lt:"#edd4a8"},
+  "Tree":{bg:"#2f5c3a",lt:"#a8d4b4"},"Grass":{bg:"#6b7c2f",lt:"#d4e8a8"},
+  "Fern":{bg:"#2f7c5a",lt:"#a8e8cc"},"Vine":{bg:"#5a2f7c",lt:"#cca8e8"},
+  "Ground Cover":{bg:"#2f7c7c",lt:"#a8e8e8"},"Annual":{bg:"#7c2f5a",lt:"#e8a8cc"},
+  "Bulb":{bg:"#4a2f7c",lt:"#bba8e8"},"Houseplant":{bg:"#2f5a7c",lt:"#a8cce8"},
+  "Fruit":{bg:"#7c3a2f",lt:"#e8b4a8"},"Vegetable":{bg:"#3a7c2f",lt:"#b4e8a8"},
+  "Herb":{bg:"#7c6b2f",lt:"#e8d4a8"},"Succulent":{bg:"#2f7c6b",lt:"#a8e8d4"},
+  "Cactus":{bg:"#7c5a2f",lt:"#e8cca8"},"Food Forest":{bg:"#3a5c2f",lt:"#b8d4a8"},
+  "Herbaceous":{bg:"#4a7c4a",lt:"#b8e8b8"},"Semi-Aquatic":{bg:"#2f4a7c",lt:"#a8b8e8"},
+  "Groundcover":{bg:"#2f7c6b",lt:"#a8e8d4"},"Grasses/Sedges":{bg:"#6b7c3a",lt:"#d4e8b0"},
+  "Small Tree":{bg:"#3a6b2f",lt:"#b4d4a8"},"Canopy":{bg:"#2f5c2f",lt:"#a8cca8"},
+};
+const CAT_ICON = {
+  "Perennial":"🌸","Shrub":"🌿","Tree":"🌳","Grass":"🌾","Fern":"🌿",
+  "Vine":"🍃","Ground Cover":"🍀","Annual":"🌼","Bulb":"🧅","Houseplant":"🪴",
+  "Fruit":"🍎","Vegetable":"🥦","Herb":"🌿","Succulent":"🌵","Cactus":"🌵",
+  "Food Forest":"🌲","Herbaceous":"🌱","Semi-Aquatic":"💧","Groundcover":"🍀",
+  "Grasses/Sedges":"🌾","Small Tree":"🌳","Canopy":"🌲",
+};
+const POT_SIZES = ['4"','6"','1 gal','2 gal','3 gal','5 gal','7 gal','10 gal','15 gal','25 gal','B&B','Bare root','Plug'];
+const ALL_CATS = [...new Set(PLANTS.map(p=>p.cat))];
+
+// ── State ──────────────────────────────────────────────
+let stock = [];   // [{id, plantId, potSize, price, qty}]
+let nid = 1;
+let openCards = {};       // key -> bool
+let selPlant = null;      // currently selected plant in Adjust
+let editingEntryId = null;
+let showAddForm = false;
+let libCat = 'All';
+let adjDropOpen = false;
+
+// ── Helpers ────────────────────────────────────────────
+function getIcon(cat){ return CAT_ICON[cat]||'🌿'; }
+function badge(cat){
+  const c=CAT_COLORS[cat]||{bg:'#4a7c2f',lt:'#d4edb8'};
+  return `<span class="badge" style="background:${c.bg};color:${c.lt}">${cat}</span>`;
+}
+function qColor(n){ return n===0?'#8c2020':n<=5?'#8c5c00':'#2a6020'; }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function detailHTML(p){
+  return `<div class="detail-grid">
+    <div class="detail-row"><span class="detail-label">Latin: </span><em>${esc(p.latin)}</em></div>
+    <div class="detail-row"><span class="detail-label">Zone: </span>${esc(p.zone)}</div>
+    <div class="detail-row"><span class="detail-label">Soil: </span>${esc(p.soil)}</div>
+    <div class="detail-row"><span class="detail-label">Sun: </span>${esc(p.sun)}</div>
+    <div class="detail-row"><span class="detail-label">Water: </span>${esc(p.water)}</div>
+    <div class="detail-row"><span class="detail-label">Height: </span>${esc(p.height)}</div>
+    <div class="detail-row"><span class="detail-label">Bloom: </span>${esc(p.bloom)}</div>
+    <div class="detail-row"><span class="detail-label">Land: </span>${esc(p.land)}</div>
+  </div>
+  <div class="detail-notes">${esc(p.notes)}</div>`;
+}
+
+// ── Tab switching ──────────────────────────────────────
+function switchTab(tab, btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+tab).classList.add('active');
+  btn.classList.add('active');
+  // Scroll to top of new page
+  document.getElementById('page-'+tab).scrollTop = 0;
+  if(tab==='stock') renderStock();
+  if(tab==='library') renderLib();
+}
+
+// ── STOCK ─────────────────────────────────────────────
+function renderStock(){
+  const q = (document.getElementById('stock-search').value||'').toLowerCase();
+  const list = document.getElementById('stock-list');
+  const filtered = stock.filter(s=>{
+    if(!q) return true;
+    const p = PLANTS.find(x=>x.id===s.plantId);
+    return p&&(p.name.toLowerCase().includes(q)||p.cat.toLowerCase().includes(q)||p.latin.toLowerCase().includes(q));
+  });
+  if(!stock.length){
+    list.innerHTML=`<div class="empty"><div class="empty-icon">🪴</div><div class="empty-title">Stock Empty</div><div class="empty-sub">Use the Adjust tab to add plants.</div></div>`;
+    return;
+  }
+  if(!filtered.length){
+    list.innerHTML=`<div class="empty"><div class="empty-sub">No plants match your search.</div></div>`;
+    return;
+  }
+  list.innerHTML = filtered.map(s=>{
+    const p = PLANTS.find(x=>x.id===s.plantId);
+    if(!p) return '';
+    const k=`s${s.id}`;
+    const isOpen=openCards[k];
+    return `<div class="card">
+      <button class="card-row" onclick="toggleCard('${k}')">
+        <div class="card-icon">${getIcon(p.cat)}</div>
+        <div style="flex:1;min-width:0">
+          <div class="plant-name">${esc(p.name)}</div>
+          <div class="card-meta">${badge(p.cat)}<span class="pill">${esc(s.potSize)}</span><span class="pill gold">$${s.price.toFixed(2)}</span></div>
+        </div>
+        <div class="qty-num" style="color:${qColor(s.qty)}">${s.qty}</div>
+        <div class="chevron${isOpen?' open':''}">▾</div>
+      </button>
+      <div class="detail${isOpen?' open':''}">${detailHTML(p)}</div>
+    </div>`;
+  }).join('');
+  // footer
+  const total = filtered.reduce((a,s)=>a+s.qty,0);
+  list.innerHTML += `<div style="text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:10px;color:#9b7a3a;text-transform:uppercase;letter-spacing:1px;margin-top:4px">${filtered.length} SKU${filtered.length!==1?'s':''} · ${total} units</div>`;
+}
+
+function toggleCard(k){
+  openCards[k]=!openCards[k];
+  const curTab = document.querySelector('.page.active').id;
+  if(curTab==='page-stock') renderStock();
+  else if(curTab==='page-library') renderLib();
+}
+
+// ── ADJUST ────────────────────────────────────────────
+function adjSearch(){
+  const q = (document.getElementById('adj-search').value||'').toLowerCase().trim();
+  const drop = document.getElementById('adj-drop');
+  if(!q){ drop.innerHTML=''; drop.classList.remove('open'); return; }
+  const results = PLANTS.filter(p=>p.name.toLowerCase().includes(q)||p.latin.toLowerCase().includes(q)||p.cat.toLowerCase().includes(q)).slice(0,12);
+  if(!results.length){ drop.innerHTML=''; drop.classList.remove('open'); return; }
+  drop.innerHTML = results.map(p=>`
+    <button class="drop-item" onmousedown="selectPlant(${p.id})">
+      <span style="font-size:18px">${getIcon(p.cat)}</span>
+      <div style="flex:1">
+        <div class="drop-name">${esc(p.name)}</div>
+        <div class="drop-latin">${esc(p.latin)}</div>
+      </div>
+      ${badge(p.cat)}
+    </button>`).join('');
+  drop.classList.add('open');
+}
+
+function selectPlant(id){
+  selPlant = PLANTS.find(p=>p.id===id);
+  editingEntryId = null;
+  showAddForm = false;
+  document.getElementById('adj-search').value = selPlant.name;
+  document.getElementById('adj-drop').classList.remove('open');
+  renderAdjust();
+}
+
+function renderAdjust(){
+  document.getElementById('adj-empty-sub').textContent = `Search any of the ${PLANTS.length} plants to adjust inventory.`;
+  if(!selPlant){ return; }
+  const p = selPlant;
+  const entries = stock.filter(s=>s.plantId===p.id);
+
+  let entriesHTML = entries.map((s,i)=>{
+    if(editingEntryId===s.id){
+      return `<div class="edit-form">
+        <div class="field-grid">
+          <div><div class="field-label">Pot size</div>
+            <select id="ep-pot" style="font-size:14px;padding:8px 10px">${POT_SIZES.map(ps=>`<option${ps===s.potSize?' selected':''}>${esc(ps)}</option>`).join('')}</select>
+          </div>
+          <div><div class="field-label">Price ($)</div>
+            <input id="ep-price" type="number" step="0.01" value="${s.price.toFixed(2)}" style="font-size:14px;padding:8px 10px" oninput="previewQty(${s.id},${s.qty})">
+          </div>
+          <div><div class="field-label">Qty ±</div>
+            <input id="ep-delta" type="number" value="0" style="font-size:14px;padding:8px 10px" oninput="previewQty(${s.id},${s.qty})">
+          </div>
+        </div>
+        <div class="new-qty-preview" id="ep-preview">New qty: <strong style="color:${qColor(s.qty)};font-size:16px">${s.qty}</strong> (was ${s.qty})</div>
+        <div class="btn-row">
+          <button class="btn primary" style="flex:2" onclick="saveEdit(${s.id},${s.qty})">Save</button>
+          <button class="btn" style="flex:1" onclick="cancelEdit()">Cancel</button>
+        </div>
+      </div>`;
+    }
+    return `<div class="entry-row${i<entries.length-1?'':''}" style="border-bottom:${i<entries.length-1?'1px solid #d4b86a':'none'}">
+      <div style="flex:1;display:flex;gap:5px;flex-wrap:wrap;align-items:center">
+        <span class="pill">${esc(s.potSize)}</span>
+        <span class="pill gold">$${s.price.toFixed(2)}</span>
+        <span class="entry-qty" style="color:${qColor(s.qty)}">${s.qty} in stock</span>
+      </div>
+      <button class="btn sm" onclick="startEdit(${s.id})">Edit</button>
+      <button class="danger-sm" onclick="deleteEntry(${s.id})">✕</button>
+    </div>`;
+  }).join('');
+
+  let addFormHTML = '';
+  if(showAddForm){
+    addFormHTML = `<div class="card" style="margin-top:0">
+      <div class="new-form-hdr"><div class="new-form-hdr-txt">New Stock Entry — ${esc(p.name)}</div></div>
+      <div class="new-form-body">
+        <div class="field-grid">
+          <div><div class="field-label">Pot size</div>
+            <select id="np-pot" style="font-size:14px;padding:8px 10px">${POT_SIZES.map(ps=>`<option>${esc(ps)}</option>`).join('')}</select>
+          </div>
+          <div><div class="field-label">Price ($)</div>
+            <input id="np-price" type="number" step="0.01" placeholder="0.00" style="font-size:14px;padding:8px 10px">
+          </div>
+          <div><div class="field-label">Starting qty</div>
+            <input id="np-qty" type="number" value="0" style="font-size:14px;padding:8px 10px">
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn primary" style="flex:2" onclick="addEntry()">Add to Stock</button>
+          <button class="btn" style="flex:1" onclick="cancelAdd()">Cancel</button>
+        </div>
+      </div>
+    </div>`;
+  } else {
+    addFormHTML = `<button class="add-btn" id="show-add-btn">+ Add New ${esc(p.name)} Entry</button>`;
+  }
+
+  document.getElementById('adj-content').innerHTML = `
+    <div class="card" style="margin-bottom:12px">
+      <div class="sel-hdr">
+        <div class="card-icon" style="width:44px;height:44px;font-size:22px;background:#f2ead4">${getIcon(p.cat)}</div>
+        <div style="flex:1">
+          <div class="sel-name">${esc(p.name)}</div>
+          <div class="sel-latin">${esc(p.latin)}</div>
+          <div style="margin-top:5px">${badge(p.cat)}</div>
+        </div>
+      </div>
+      ${entries.length?entriesHTML:`<div style="padding:14px 16px;font-size:12px;color:#6b5020">No stock entries yet for this plant.</div>`}
+    </div>
+    ${addFormHTML}`;
+
+
+}
+
+function previewQty(id, origQty){
+  const delta = parseInt(document.getElementById('ep-delta')?.value)||0;
+  const newQty = Math.max(0, origQty + delta);
+  const prev = document.getElementById('ep-preview');
+  if(prev) prev.innerHTML = `New qty: <strong style="color:${qColor(newQty)};font-size:16px">${newQty}</strong> <span style="opacity:.6">(was ${origQty})</span>`;
+}
+
+function startEdit(id){
+  editingEntryId = id;
+  showAddForm = false;
+  renderAdjust();
+}
+function cancelEdit(){ editingEntryId=null; renderAdjust(); }
+
+function saveEdit(id, origQty){
+  const delta = parseInt(document.getElementById('ep-delta')?.value)||0;
+  const price = parseFloat(document.getElementById('ep-price')?.value)||0;
+  const pot = document.getElementById('ep-pot')?.value||'1 gal';
+  stock = stock.map(s=>s.id!==id?s:{...s,qty:Math.max(0,origQty+delta),price,potSize:pot});
+  editingEntryId = null;
+  renderAdjust();
+  renderStock();
+}
+
+function deleteEntry(id){
+  stock = stock.filter(s=>s.id!==id);
+  renderAdjust();
+  renderStock();
+}
+
+function showAdd(){ showAddForm=true; editingEntryId=null; renderAdjust(); }
+function cancelAdd(){ showAddForm=false; renderAdjust(); }
+
+function addEntry(){
+  const price = parseFloat(document.getElementById('np-price')?.value)||0;
+  const qty = parseInt(document.getElementById('np-qty')?.value)||0;
+  const pot = document.getElementById('np-pot')?.value||'1 gal';
+  if(!selPlant) return;
+  stock.push({id:nid++, plantId:selPlant.id, potSize:pot, price, qty});
+  showAddForm=false;
+  renderAdjust();
+  renderStock();
+}
+
+// ── LIBRARY ───────────────────────────────────────────
+function renderLib(){
+  const q = (document.getElementById('lib-search').value||'').toLowerCase();
+  const filtered = PLANTS.filter(p=>(libCat==='All'||p.cat===libCat)&&(!q||p.name.toLowerCase().includes(q)||p.latin.toLowerCase().includes(q)||p.soil.toLowerCase().includes(q)||p.land.toLowerCase().includes(q)));
+
+  // Pills
+  const pb = document.getElementById('pill-bar');
+  pb.innerHTML = ['All',...ALL_CATS].map(c=>{
+    const act = libCat===c;
+    const col = CAT_COLORS[c]||{bg:'#4a7c2f',lt:'#c8e6a8'};
+    const style = act?`background:${col.bg};color:${col.lt};border:none`:`background:transparent;color:#6b5020;border:1.5px solid #b5993a`;
+    return `<button class="cat-pill${act?' active':''}" style="${style}" onclick="setLibCat('${esc(c)}')">${esc(c)}</button>`;
+  }).join('');
+
+  document.getElementById('lib-count').textContent = `${filtered.length} of ${PLANTS.length} plants`;
+
+  document.getElementById('lib-list').innerHTML = filtered.map(p=>{
+    const k=`l${p.id}`;
+    const isOpen=openCards[k];
+    return `<div class="card">
+      <button class="card-row" onclick="toggleCard('${k}')">
+        <div class="card-icon sm">${getIcon(p.cat)}</div>
+        <div style="flex:1;min-width:0">
+          <div class="plant-name sm">${esc(p.name)}</div>
+          <div class="card-meta">${badge(p.cat)}<span style="font-size:10px;color:#9b7a3a;font-style:italic">${esc(p.latin)}</span></div>
+        </div>
+        <div class="chevron${isOpen?' open':''}">▾</div>
+      </button>
+      <div class="detail${isOpen?' open':''}">${detailHTML(p)}</div>
+    </div>`;
+  }).join('');
+}
+
+function setLibCat(c){
+  libCat=c;
+  renderLib();
+}
+
+// ── Init ──────────────────────────────────────────────
+document.getElementById('plant-count-hdr').innerHTML = `${PLANTS.length}<br>plants`;
+document.getElementById('adj-empty-sub').textContent = `Search any of the ${PLANTS.length} plants to adjust inventory.`;
+
+// Close dropdown when tapping outside
+document.addEventListener('click', e=>{
+  const drop = document.getElementById('adj-drop');
+  const input = document.getElementById('adj-search');
+  if(!drop.contains(e.target)&&e.target!==input) drop.classList.remove('open');
+});
+
+renderStock();
+renderLib();
+
+// Delegated listener on stable parent - handles dynamically rendered buttons reliably on iOS
+document.getElementById('adj-content').addEventListener('click', function(e){
+  const btn = e.target.closest('#show-add-btn');
+  if(btn) showAdd();
+});
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+}
+</script>
+</body>
+</html>
